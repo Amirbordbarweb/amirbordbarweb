@@ -117,7 +117,7 @@
                     
                     try {
                         // بررسی توکن
-                        if (GITHUB_CONFIG.token === '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' || GITHUB_CONFIG.token.length < 10) {
+                        if (GITHUB_CONFIG.token === 'TOKEN_GHADI_JADID' || GITHUB_CONFIG.token.length < 10) {
                             throw new Error('لطفاً توکن GitHub خود را در کد قرار دهید (خط 25)');
                         }
                         
@@ -338,7 +338,7 @@
             debugLog('=== صفحه لود شد ===');
             debugLog(`کاربر: ${GITHUB_CONFIG.username}`);
             debugLog(`ریپو: ${GITHUB_CONFIG.repo}`);
-            debugLog(`توکن وارد شده: ${GITHUB_CONFIG.token !== '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' ? 'بله' : 'خیر (نیاز به جایگزینی)'}`);
+            debugLog(`توکن وارد شده: ${GITHUB_CONFIG.token !== 'TOKEN_GHADI_JADID' ? 'بله' : 'خیر (نیاز به جایگزینی)'}`);
         };
     </script>
 </body>

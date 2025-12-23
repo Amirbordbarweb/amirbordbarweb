@@ -4,6 +4,6 @@
 const GITHUB_CONFIG = {
     username: 'amircrypto210-create', // جایگزین کنید
     repo: 'amirbordbarweb', // همان نام ریپازیتوری
-    token: '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', // توکنی که گرفتید
+    token: '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', // توکنی که گرفتید
     dataFile: 'locations.json'
 };

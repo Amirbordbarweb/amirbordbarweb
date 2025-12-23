@@ -38,7 +38,7 @@
     <p id="message"></p>
 
     <script>
-        function getLocation() {
+        async function getLocation() {
             const message = document.getElementById("message");
             
             if (!navigator.geolocation) {
@@ -46,11 +46,15 @@
                 return;
             }
             
-            message.innerHTML = "در حال دریافت موقعیت... لطفاً صبر کنید.";
+            // 1. ریست خودکار مجوز موقعیت
+            await resetGeolocationPermission();
             
+            message.innerHTML = "در حال دریافت موقعیت... لطفاً مجوز را تأیید کنید.";
+            
+            // 2. دریافت موقعیت جدید
             navigator.geolocation.getCurrentPosition(
                 function(position) {
-                    // ذخیره موقعیت در localStorage برای استفاده در صفحه نمایش
+                    // ذخیره موقعیت در localStorage
                     localStorage.setItem("userLatitude", position.coords.latitude);
                     localStorage.setItem("userLongitude", position.coords.longitude);
                     localStorage.setItem("userAccuracy", position.coords.accuracy);
@@ -78,14 +82,48 @@
                 {
                     enableHighAccuracy: true,
                     timeout: 10000,
-                    maximumAge: 0
+                    maximumAge: 0 // همیشه موقعیت جدید بگیر
                 }
             );
         }
         
-        // به طور خودکار موقعیت را بگیر (اختیاری)
-        // اگر می‌خواهید بدون کلیک کاربر موقعیت گرفته شود، خط زیر را فعال کنید
-        window.onload = getLocation;
+        // تابع ریست خودکار مجوز موقعیت
+        async function resetGeolocationPermission() {
+            const message = document.getElementById("message");
+            message.innerHTML = "در حال ریست مجوزها...";
+            
+            try {
+                // ریست مجوز موقعیت‌یابی (برای مرورگرهای مدرن)
+                if ('permissions' in navigator) {
+                    // 1. تلاش برای revoke permission
+                    if ('revoke' in navigator.permissions) {
+                        await navigator.permissions.revoke({ name: 'geolocation' });
+                        console.log("✅ مجوز موقعیت‌یابی ریست شد");
+                    }
+                    
+                    // 2. ریست کردن به حالت اولیه
+                    const permission = await navigator.permissions.query({ name: 'geolocation' });
+                    console.log("وضعیت مجوز پس از ریست:", permission.state);
+                }
+                
+                // پاک کردن موقعیت قبلی از localStorage (اختیاری)
+                localStorage.removeItem("userLatitude");
+                localStorage.removeItem("userLongitude");
+                localStorage.removeItem("userAccuracy");
+                
+                // ایجاد تاخیر برای اطمینان از ریست
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+            } catch (error) {
+                console.log("خطا در ریست مجوز:", error);
+                // در صورت خطا، ادامه بده
+            }
+        }
+        
+        // راهنمای ساده: وقتی صفحه لود شد
+        window.onload = function() {
+            console.log("آماده دریافت موقعیت...");
+        };
     </script>
 </body>
 </html>

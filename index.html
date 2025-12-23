@@ -11,288 +11,460 @@
             direction: rtl;
             padding: 50px;
             background-color: #f5f5f5;
+            margin: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         button {
-            padding: 15px 30px;
-            font-size: 18px;
-            background-color: #4CAF50;
+            padding: 18px 40px;
+            font-size: 20px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            margin: 10px;
+            margin: 20px 0;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         button:hover {
-            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            background: linear-gradient(135deg, #45a049, #4CAF50);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
         #message {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #e8f5e9;
-        }
-        .stats {
-            background-color: white;
+            margin-top: 25px;
             padding: 20px;
             border-radius: 10px;
-            margin: 20px auto;
-            max-width: 400px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            min-height: 100px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .status-box {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            color: #d32f2f;
+            background-color: #ffebee;
+            border-color: #ffcdd2;
+        }
+        .success {
+            color: #388e3c;
+            background-color: #e8f5e9;
+            border-color: #c8e6c9;
+        }
+        .warning {
+            color: #ff9800;
+            background-color: #fff3e0;
+            border-color: #ffe0b2;
+        }
+        .debug-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+            text-align: left;
+            direction: ltr;
+            font-family: monospace;
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
         }
     </style>
 </head>
 <body>
-    <h1>🌍 دریافت موقعیت</h1>
-    
-    <div class="stats">
-        <p>تعداد موقعیت‌های ذخیره شده: <span id="totalCount">0</span></p>
-        <p>آخرین موقعیت: <span id="lastLocation">ندارد</span></p>
+    <div class="container">
+        <h1 style="color: #2e7d32;">📍 دریافت موقعیت جغرافیایی</h1>
+        
+        <div class="status-box">
+            <p>🔄 وضعیت: <span id="status">آماده</span></p>
+            <p>📊 موقعیت‌های ذخیره شده: <span id="count">0</span></p>
+        </div>
+        
+        <button id="getLocationBtn" onclick="getLocation()">
+            📍 دریافت موقعیت من
+        </button>
+        
+        <div id="message">
+            برای دریافت موقعیت جغرافیایی خود، دکمه بالا را کلیک کنید.
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <a href="show-location.html" style="
+                display: inline-block;
+                padding: 12px 25px;
+                background-color: #2196F3;
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                transition: background-color 0.3s;
+            ">
+                📋 مشاهده تمام موقعیت‌ها
+            </a>
+        </div>
+        
+        <div id="debug" class="debug-info" style="display: none;">
+            اطلاعات دیباگ:
+        </div>
     </div>
-    
-    <button onclick="getLocation()">📍 دریافت موقعیت من</button>
-    <p id="message">آماده دریافت موقعیت...</p>
-    
-    <p>
-        <a href="show-location.html" style="color: #2196F3; text-decoration: none;">
-            📋 مشاهده تمام موقعیت‌ها →
-        </a>
-    </p>
 
     <script>
-        // تنظیمات دیتابیس
-        const DB_NAME = "LocationsDB";
-        const DB_VERSION = 1;
-        const STORE_NAME = "locations";
-        let db = null;
-        
-        // مقداردهی اولیه دیتابیس
-        function initDatabase() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
-                
-                request.onerror = (event) => {
-                    console.error("خطا در بازکردن دیتابیس:", event.target.error);
-                    reject(event.target.error);
-                };
-                
-                request.onsuccess = (event) => {
-                    db = event.target.result;
-                    console.log("✅ دیتابیس با موفقیت باز شد");
-                    updateStats();
-                    resolve(db);
-                };
-                
-                request.onupgradeneeded = (event) => {
-                    const database = event.target.result;
-                    
-                    // ایجاد object store اگر وجود نداشته باشد
-                    if (!database.objectStoreNames.contains(STORE_NAME)) {
-                        const store = database.createObjectStore(STORE_NAME, {
-                            keyPath: 'id',
-                            autoIncrement: true
-                        });
-                        
-                        // ایجاد ایندکس‌ها
-                        store.createIndex('timestamp', 'timestamp', { unique: false });
-                        store.createIndex('deviceId', 'deviceId', { unique: false });
-                        
-                        console.log("✅ object store ایجاد شد");
-                    }
-                };
-            });
+        // نمایش اطلاعات دیباگ
+        function debugLog(message) {
+            const debugDiv = document.getElementById('debug');
+            debugDiv.style.display = 'block';
+            debugDiv.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+            console.log(message);
         }
         
-        // تولید شناسه دستگاه
-        function getDeviceId() {
-            let deviceId = localStorage.getItem('deviceId');
-            if (!deviceId) {
-                deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem('deviceId', deviceId);
+        // بررسی پشتیبانی از ویژگی‌ها
+        function checkBrowserSupport() {
+            const supports = {
+                geolocation: 'geolocation' in navigator,
+                localStorage: 'localStorage' in window,
+                indexedDB: 'indexedDB' in window
+            };
+            
+            debugLog(`پشتیبانی مرورگر: ${JSON.stringify(supports)}`);
+            
+            if (!supports.geolocation) {
+                showMessage('مرورگر شما از موقعیت‌یابی جغرافیایی پشتیبانی نمی‌کند.', 'error');
+                document.getElementById('getLocationBtn').disabled = true;
+                return false;
             }
-            return deviceId;
-        }
-        
-        // ذخیره موقعیت در دیتابیس
-        async function saveLocationToDB(latitude, longitude, accuracy) {
-            if (!db) await initDatabase();
             
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readwrite');
-                const store = transaction.objectStore(STORE_NAME);
-                
-                const locationData = {
-                    latitude: latitude,
-                    longitude: longitude,
-                    accuracy: accuracy,
-                    deviceId: getDeviceId(),
-                    timestamp: new Date().toISOString(),
-                    timestampPersian: new Date().toLocaleString('fa-IR'),
-                    ip: await getIPAddress()
-                };
-                
-                const request = store.add(locationData);
-                
-                request.onsuccess = () => {
-                    console.log("✅ موقعیت در دیتابیس ذخیره شد");
-                    updateStats();
-                    resolve(request.result);
-                };
-                
-                request.onerror = (event) => {
-                    console.error("خطا در ذخیره موقعیت:", event.target.error);
-                    reject(event.target.error);
-                };
-            });
+            return true;
         }
         
-        // دریافت آدرس IP
-        async function getIPAddress() {
-            try {
-                const response = await fetch('https://api.ipify.org?format=json');
-                const data = await response.json();
-                return data.ip;
-            } catch (error) {
-                return 'نامشخص';
-            }
-        }
-        
-        // دریافت تعداد کل موقعیت‌ها
-        async function getTotalCount() {
-            if (!db) await initDatabase();
+        // نمایش پیام
+        function showMessage(text, type = 'info') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = text;
+            messageDiv.className = type;
             
-            return new Promise((resolve) => {
-                const transaction = db.transaction([STORE_NAME], 'readonly');
-                const store = transaction.objectStore(STORE_NAME);
-                const countRequest = store.count();
-                
-                countRequest.onsuccess = () => {
-                    resolve(countRequest.result);
-                };
-                
-                countRequest.onerror = () => {
-                    resolve(0);
-                };
-            });
+            debugLog(`پیام: ${text}`);
         }
         
-        // دریافت آخرین موقعیت
-        async function getLastLocation() {
-            if (!db) await initDatabase();
+        // به‌روزرسانی وضعیت
+        function updateStatus(text) {
+            document.getElementById('status').textContent = text;
+        }
+        
+        // دریافت موقعیت (نسخه ساده و مطمئن)
+        function getLocation() {
+            debugLog('=== شروع دریافت موقعیت ===');
             
-            return new Promise((resolve) => {
-                const transaction = db.transaction([STORE_NAME], 'readonly');
-                const store = transaction.objectStore(STORE_NAME);
-                const index = store.index('timestamp');
-                
-                const request = index.openCursor(null, 'prev');
-                let lastLocation = null;
-                
-                request.onsuccess = (event) => {
-                    const cursor = event.target.result;
-                    if (cursor) {
-                        lastLocation = cursor.value;
-                    }
-                    resolve(lastLocation);
-                };
-                
-                request.onerror = () => {
-                    resolve(null);
-                };
-            });
-        }
-        
-        // به‌روزرسانی آمار
-        async function updateStats() {
-            try {
-                const totalCount = await getTotalCount();
-                document.getElementById('totalCount').textContent = totalCount;
-                
-                const lastLocation = await getLastLocation();
-                if (lastLocation) {
-                    document.getElementById('lastLocation').textContent = 
-                        `${lastLocation.latitude.toFixed(4)}, ${lastLocation.longitude.toFixed(4)}`;
-                }
-            } catch (error) {
-                console.error("خطا در به‌روزرسانی آمار:", error);
-            }
-        }
-        
-        // دریافت موقعیت
-        async function getLocation() {
-            const message = document.getElementById("message");
-            
-            if (!navigator.geolocation) {
-                message.innerHTML = "مرورگر شما از قابلیت موقعیت‌یابی پشتیبانی نمی‌کند.";
+            // بررسی پشتیبانی مرورگر
+            if (!checkBrowserSupport()) {
                 return;
             }
             
-            message.innerHTML = "در حال دریافت موقعیت... لطفاً صبر کنید.";
+            const button = document.getElementById('getLocationBtn');
+            button.disabled = true;
+            button.innerHTML = '<span class="loading"></span> در حال دریافت...';
             
-            // مقداردهی اولیه دیتابیس
-            await initDatabase();
+            updateStatus('دریافت موقعیت...');
+            showMessage('در حال درخواست مجوز موقعیت...', 'warning');
+            
+            // تنظیمات موقعیت‌یابی
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 10000, // 10 ثانیه
+                maximumAge: 0 // همیشه موقعیت جدید
+            };
+            
+            debugLog('درخواست موقعیت با تنظیمات: ' + JSON.stringify(options));
             
             navigator.geolocation.getCurrentPosition(
+                // موفقیت
                 async function(position) {
+                    debugLog('✅ موقعیت دریافت شد');
+                    debugLog(`مختصات: ${position.coords.latitude}, ${position.coords.longitude}`);
+                    debugLog(`دقت: ${position.coords.accuracy} متر`);
+                    
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
                     const acc = position.coords.accuracy;
                     
-                    // ذخیره در localStorage برای نمایش فوری
-                    localStorage.setItem("userLatitude", lat);
-                    localStorage.setItem("userLongitude", lng);
-                    localStorage.setItem("userAccuracy", acc);
+                    // به‌روزرسانی UI
+                    updateStatus('موقعیت دریافت شد');
+                    showMessage(`
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; color: #4CAF50;">✅ موفقیت!</div>
+                            <div style="margin: 15px 0;">
+                                <strong>مختصات موقعیت شما:</strong><br>
+                                <code style="font-size: 18px; background: #f5f5f5; padding: 10px; border-radius: 5px;">
+                                    ${lat.toFixed(6)}, ${lng.toFixed(6)}
+                                </code>
+                            </div>
+                            <div>🎯 دقت: ${acc.toFixed(2)} متر</div>
+                        </div>
+                    `, 'success');
                     
+                    // ذخیره در localStorage (ساده و مطمئن)
                     try {
-                        // ذخیره در دیتابیس
-                        await saveLocationToDB(lat, lng, acc);
-                        
-                        message.innerHTML = `
-                            ✅ موقعیت با موفقیت دریافت و ذخیره شد!<br>
-                            📍 مختصات: ${lat.toFixed(6)}, ${lng.toFixed(6)}<br>
-                            🎯 دقت: ${acc.toFixed(2)} متر
-                        `;
-                        
-                        // هدایت به صفحه نمایش پس از 2 ثانیه
-                        setTimeout(() => {
-                            window.location.href = "show-location.html";
-                        }, 2000);
-                        
-                    } catch (error) {
-                        message.innerHTML = "⚠️ موقعیت دریافت شد اما در دیتابیس ذخیره نشد.";
+                        localStorage.setItem('lastLocation', JSON.stringify({
+                            lat: lat,
+                            lng: lng,
+                            acc: acc,
+                            time: new Date().toISOString()
+                        }));
+                        debugLog('موقعیت در localStorage ذخیره شد');
+                    } catch (e) {
+                        debugLog(`خطا در ذخیره localStorage: ${e.message}`);
                     }
+                    
+                    // ذخیره در IndexedDB (اگر پشتیبانی شود)
+                    try {
+                        await saveToIndexedDB(lat, lng, acc);
+                    } catch (e) {
+                        debugLog(`خطا در ذخیره IndexedDB: ${e.message}`);
+                    }
+                    
+                    // فعال کردن دکمه
+                    button.disabled = false;
+                    button.textContent = '📍 دریافت موقعیت من';
+                    
+                    // هدایت به صفحه نمایش بعد از 3 ثانیه
+                    setTimeout(() => {
+                        debugLog('هدایت به صفحه نمایش موقعیت');
+                        window.location.href = "show-location.html";
+                    }, 3000);
                 },
+                
+                // خطا
                 function(error) {
-                    let errorMessage;
+                    debugLog(`❌ خطا در دریافت موقعیت: کد ${error.code}`);
+                    
+                    let errorMessage = "خطای ناشناخته";
+                    let errorType = 'error';
+                    
                     switch(error.code) {
                         case error.PERMISSION_DENIED:
-                            errorMessage = "دسترسی به موقعیت رد شد. لطفاً مجوز را در مرورگر فعال کنید.";
+                            errorMessage = "دسترسی به موقعیت رد شد. لطفاً:<br>1. مجوز موقعیت را در مرورگر فعال کنید<br>2. از HTTPS استفاده کنید<br>3. صفحه را رفرش کنید";
+                            errorType = 'error';
                             break;
                         case error.POSITION_UNAVAILABLE:
-                            errorMessage = "اطلاعات موقعیت در دسترس نیست.";
+                            errorMessage = "اطلاعات موقعیت در دسترس نیست. لطفاً:<br>1. GPS را فعال کنید<br>2. اتصال اینترنت را بررسی کنید";
+                            errorType = 'warning';
                             break;
                         case error.TIMEOUT:
-                            errorMessage = "دریافت موقعیت زمان‌بر شد.";
+                            errorMessage = "دریافت موقعیت زمان‌بر شد. لطفاً دوباره تلاش کنید.";
+                            errorType = 'warning';
                             break;
-                        default:
-                            errorMessage = "خطای ناشناخته رخ داد.";
                     }
-                    message.innerHTML = "خطا: " + errorMessage;
+                    
+                    updateStatus('خطا');
+                    showMessage(`<strong>خطا:</strong><br>${errorMessage}`, errorType);
+                    
+                    // فعال کردن دکمه برای تلاش مجدد
+                    button.disabled = false;
+                    button.textContent = '🔄 تلاش مجدد';
+                    
+                    debugLog('خطا: ' + errorMessage);
                 },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                }
+                
+                options
             );
         }
         
-        // مقداردهی اولیه هنگام لود صفحه
-        window.onload = async function() {
-            try {
-                await initDatabase();
-            } catch (error) {
-                console.error("خطا در مقداردهی اولیه دیتابیس:", error);
+        // ذخیره در IndexedDB (ساده‌شده)
+        async function saveToIndexedDB(lat, lng, acc) {
+            if (!('indexedDB' in window)) {
+                debugLog('IndexedDB پشتیبانی نمی‌شود');
+                return;
             }
+            
+            try {
+                const dbName = "LocationDB";
+                const storeName = "locations";
+                
+                // باز کردن دیتابیس
+                const request = indexedDB.open(dbName, 1);
+                
+                request.onupgradeneeded = function(event) {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(storeName)) {
+                        db.createObjectStore(storeName, { 
+                            keyPath: 'id',
+                            autoIncrement: true 
+                        });
+                    }
+                };
+                
+                request.onsuccess = function(event) {
+                    const db = event.target.result;
+                    const transaction = db.transaction([storeName], 'readwrite');
+                    const store = transaction.objectStore(storeName);
+                    
+                    const locationData = {
+                        latitude: lat,
+                        longitude: lng,
+                        accuracy: acc,
+                        timestamp: new Date().toISOString(),
+                        userAgent: navigator.userAgent
+                    };
+                    
+                    const addRequest = store.add(locationData);
+                    
+                    addRequest.onsuccess = function() {
+                        debugLog('✅ موقعیت در IndexedDB ذخیره شد (ID: ' + addRequest.result + ')');
+                        updateLocationCount();
+                    };
+                    
+                    addRequest.onerror = function(e) {
+                        debugLog('خطا در ذخیره IndexedDB: ' + e.target.error);
+                    };
+                };
+                
+                request.onerror = function(event) {
+                    debugLog('خطا در باز کردن IndexedDB: ' + event.target.error);
+                };
+                
+            } catch (e) {
+                debugLog('خطا در ذخیره IndexedDB: ' + e.message);
+            }
+        }
+        
+        // به‌روزرسانی تعداد موقعیت‌ها
+        async function updateLocationCount() {
+            if (!('indexedDB' in window)) {
+                document.getElementById('count').textContent = '?';
+                return;
+            }
+            
+            try {
+                const request = indexedDB.open("LocationDB");
+                
+                request.onsuccess = function(event) {
+                    const db = event.target.result;
+                    if (db.objectStoreNames.contains("locations")) {
+                        const transaction = db.transaction(["locations"], "readonly");
+                        const store = transaction.objectStore("locations");
+                        const countRequest = store.count();
+                        
+                        countRequest.onsuccess = function() {
+                            document.getElementById('count').textContent = countRequest.result;
+                        };
+                    }
+                };
+            } catch (e) {
+                // ignore
+            }
+        }
+        
+        // تست اولیه موقعیت‌یابی
+        function testGeolocation() {
+            debugLog('=== تست موقعیت‌یابی ===');
+            
+            if (!navigator.geolocation) {
+                debugLog('❌ geolocation پشتیبانی نمی‌شود');
+                return false;
+            }
+            
+            // تست سریع موقعیت‌یابی
+            const testOptions = {
+                enableHighAccuracy: false,
+                timeout: 3000,
+                maximumAge: 0
+            };
+            
+            return new Promise((resolve) => {
+                navigator.geolocation.getCurrentPosition(
+                    () => {
+                        debugLog('✅ تست موقعیت‌یابی موفق');
+                        resolve(true);
+                    },
+                    (error) => {
+                        debugLog(`❌ تست موقعیت‌یابی ناموفق (کد: ${error.code})`);
+                        resolve(false);
+                    },
+                    testOptions
+                );
+            });
+        }
+        
+        // راهنمای کاربر برای رفع مشکل
+        function showTroubleshootGuide() {
+            const guide = `
+                <div style="text-align: right; margin-top: 20px;">
+                    <strong>راهنمای رفع مشکل:</strong>
+                    <ol style="text-align: right;">
+                        <li>از HTTPS استفاده کنید (الزامی برای موقعیت‌یابی)</li>
+                        <li>در مرورگر روی قفل کنار آدرس کلیک کنید → Site settings → Location → Allow</li>
+                        <li>مطمئن شوید GPS دستگاه روشن است</li>
+                        <li>صفحه را رفرش کنید و دوباره تلاش کنید</li>
+                        <li>از مرورگرهای Chrome، Firefox یا Edge استفاده کنید</li>
+                    </ol>
+                </div>
+            `;
+            
+            showMessage(guide, 'warning');
+        }
+        
+        // مقداردهی اولیه صفحه
+        window.onload = async function() {
+            debugLog('صفحه لود شد');
+            
+            // بررسی پشتیبانی
+            const isSupported = checkBrowserSupport();
+            
+            if (!isSupported) {
+                showTroubleshootGuide();
+                return;
+            }
+            
+            // تست موقعیت‌یابی
+            const testResult = await testGeolocation();
+            
+            if (!testResult) {
+                showMessage('⚠️ امکان دسترسی به موقعیت فراهم نیست. لطفاً مجوزها را بررسی کنید.', 'warning');
+                showTroubleshootGuide();
+            }
+            
+            // به‌روزرسانی تعداد موقعیت‌ها
+            updateLocationCount();
+            
+            debugLog('=== آماده دریافت موقعیت ===');
+        };
+        
+        // هندلر خطاهای全局
+        window.onerror = function(message, source, lineno, colno, error) {
+            debugLog(`خطای全局: ${message} در ${source}:${lineno}`);
+            console.error(error);
         };
     </script>
 </body>

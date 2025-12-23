@@ -108,7 +108,7 @@
     </div>
 
     <script>
-        // تنظیمات GitHub (همانند index.html)
+        // تنظیمات GitHub
         const GITHUB_CONFIG = {
             username: 'amircrypto210-create',
             repo: 'amirbordbarweb',
@@ -183,14 +183,18 @@
         async function fetchLocationsFromGitHub() {
             const url = `https://raw.githubusercontent.com/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}/main/${GITHUB_CONFIG.dataFile}`;
             
+            console.log('Fetching from:', url);
+            
             try {
                 const response = await fetch(url + '?t=' + Date.now());
+                console.log('Response status:', response.status);
                 
                 if (!response.ok) {
                     throw new Error(`خطای HTTP: ${response.status}`);
                 }
                 
                 const data = await response.json();
+                console.log('Data received:', data);
                 return data;
                 
             } catch (error) {

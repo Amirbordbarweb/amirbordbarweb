@@ -10,60 +10,94 @@
             text-align: center;
             direction: rtl;
             padding: 50px;
-            background-color: #f0f8ff;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
         }
         .location-info {
             background-color: white;
-            border-radius: 15px;
-            padding: 30px;
-            margin: 20px auto;
-            max-width: 500px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px auto;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
         }
         .map-link {
             display: inline-block;
-            margin-top: 20px;
-            padding: 12px 25px;
+            margin: 15px;
+            padding: 15px 30px;
             background-color: #2196F3;
             color: white;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .map-link:hover {
+            background-color: #0b7dda;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         .coordinates {
-            font-family: monospace;
+            font-family: 'Courier New', monospace;
             background-color: #f8f9fa;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 15px 0;
-        }
-        #map {
-            height: 300px;
-            width: 100%;
-            max-width: 500px;
-            margin: 20px auto;
+            padding: 20px;
             border-radius: 10px;
-            display: none;
+            margin: 25px 0;
+            border-right: 5px solid #4CAF50;
+            text-align: right;
+            font-size: 18px;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .back-button {
+            background-color: #4CAF50;
+        }
+        .back-button:hover {
+            background-color: #3d8b40;
+        }
+        .map-buttons {
+            margin-top: 30px;
+        }
+        .location-icon {
+            font-size: 60px;
+            color: #4CAF50;
+            margin-bottom: 20px;
         }
     </style>
-    <!-- لود کتابخانه Google Maps (اختیاری) -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
 </head>
 <body>
-    <h1>موقعیت شما 🌐</h1>
-    
     <div class="location-info">
-        <h3>مختصات جغرافیایی:</h3>
+        <div class="location-icon">📍</div>
+        <h1>موقعیت جغرافیایی شما</h1>
+        
+        <h3>مختصات دقیق:</h3>
         <div class="coordinates">
             <p><strong>عرض جغرافیایی (Latitude):</strong> <span id="lat">در حال بارگذاری...</span></p>
             <p><strong>طول جغرافیایی (Longitude):</strong> <span id="lng">در حال بارگذاری...</span></p>
-            <p><strong>دقت:</strong> <span id="acc">در حال بارگذاری...</span> متر</p>
+            <p><strong>دقت موقعیت‌یابی:</strong> <span id="acc">در حال بارگذاری...</span> متر</p>
         </div>
         
-        <div id="map"></div>
+        <div class="map-buttons">
+            <a id="googleMapLink" class="map-link" target="_blank">
+                <span style="margin-left: 8px;">🗺️</span> مشاهده در Google Maps
+            </a>
+            <br>
+            <a id="openStreetMapLink" class="map-link" target="_blank" style="background-color: #7CB342;">
+                <span style="margin-left: 8px;">🌍</span> مشاهده در OpenStreetMap
+            </a>
+            <br>
+            <a class="map-link back-button" href="index.html">
+                <span style="margin-left: 8px;">↩️</span> بازگشت به صفحه اصلی
+            </a>
+        </div>
         
-        <a id="googleMapLink" class="map-link" target="_blank">مشاهده در Google Maps</a>
-        <br>
-        <a class="map-link" href="index.html" style="background-color: #4CAF50;">بازگشت به صفحه اصلی</a>
+        <!-- اطلاعات اضافی -->
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ddd; color: #666; font-size: 14px;">
+            <p>📍 موقعیت شما با دقت تقریبی <span id="acc2"></span> متر مشخص شده است</p>
+            <p>⏱️ زمان دریافت موقعیت: <span id="timestamp"></span></p>
+        </div>
     </div>
 
     <script>
@@ -73,56 +107,52 @@
         const acc = localStorage.getItem("userAccuracy");
         
         // نمایش داده‌ها
-        document.getElementById("lat").textContent = lat || "نامشخص";
-        document.getElementById("lng").textContent = lng || "نامشخص";
-        document.getElementById("acc").textContent = acc || "نامشخص";
+        document.getElementById("lat").textContent = lat ? parseFloat(lat).toFixed(6) : "نامشخص";
+        document.getElementById("lng").textContent = lng ? parseFloat(lng).toFixed(6) : "نامشخص";
+        document.getElementById("acc").textContent = acc ? Math.round(acc) : "نامشخص";
+        document.getElementById("acc2").textContent = acc ? Math.round(acc) : "نامشخص";
         
-        // ایجاد لینک Google Maps
+        // زمان فعلی
+        const now = new Date();
+        document.getElementById("timestamp").textContent = now.toLocaleString('fa-IR');
+        
+        // ایجاد لینک‌های نقشه
         if(lat && lng) {
-            const mapLink = document.getElementById("googleMapLink");
-            mapLink.href = `https://www.google.com/maps?q=${lat},${lng}`;
-            mapLink.textContent = `مشاهده موقعیت در Google Maps`;
+            // Google Maps
+            const googleMapLink = document.getElementById("googleMapLink");
+            googleMapLink.href = `https://www.google.com/maps?q=${lat},${lng}`;
+            
+            // OpenStreetMap
+            const osmLink = document.getElementById("openStreetMapLink");
+            osmLink.href = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=15/${lat}/${lng}`;
         }
         
-        // نمایش نقشه Google (اگر API Key دارید)
-        function initMap() {
-            if(lat && lng) {
-                const location = { lat: parseFloat(lat), lng: parseFloat(lng) };
-                const map = new google.maps.Map(document.getElementById("map"), {
-                    zoom: 15,
-                    center: location
-                });
-                new google.maps.Marker({
-                    position: location,
-                    map: map
-                });
-                document.getElementById("map").style.display = "block";
-            }
+        // اگر داده‌ای وجود ندارد، کاربر را به صفحه اصلی برگردان
+        if(!lat || !lng) {
+            setTimeout(() => {
+                alert("داده‌ای موقعیتی یافت نشد. لطفاً مجدداً موقعیت خود را مشخص کنید.");
+                window.location.href = "index.html";
+            }, 1000);
         }
         
-        // اگر API Key ندارید، این تابع را فراخوانی نکنید
-        // initMap();
-        
-        // روش جایگزین: استفاده از OpenStreetMap (نیاز به API Key ندارد)
-        function showOSMMap() {
-            if(lat && lng) {
-                const mapElement = document.getElementById("map");
-                mapElement.innerHTML = `<iframe 
-                    width="100%" 
-                    height="300" 
-                    frameborder="0" 
-                    scrolling="no" 
-                    marginheight="0" 
-                    marginwidth="0" 
-                    src="https://www.openstreetmap.org/export/embed.html?bbox=${lng-0.01},${lat-0.01},${lng+0.01},${lat+0.01}&layer=mapnik&marker=${lat},${lng}"
-                    style="border-radius: 10px;">
-                </iframe>`;
-                mapElement.style.display = "block";
-            }
+        // ذخیره تاریخچه (اختیاری)
+        function saveToHistory(lat, lng) {
+            const history = JSON.parse(localStorage.getItem('locationHistory') || '[]');
+            history.push({
+                lat: lat,
+                lng: lng,
+                time: new Date().toISOString(),
+                accuracy: acc
+            });
+            // فقط 10 موقعیت آخر را نگه دار
+            if(history.length > 10) history.shift();
+            localStorage.setItem('locationHistory', JSON.stringify(history));
         }
         
-        // برای استفاده از OpenStreetMap، خط زیر را فعال کنید
-        // showOSMMap();
+        // ذخیره در تاریخچه
+        if(lat && lng) {
+            saveToHistory(lat, lng);
+        }
     </script>
 </body>
 </html>

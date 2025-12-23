@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نمایش موقعیت</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            direction: rtl;
+            padding: 50px;
+            background-color: #f0f8ff;
+        }
+        .location-info {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px auto;
+            max-width: 500px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .map-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background-color: #2196F3;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+        .coordinates {
+            font-family: monospace;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        #map {
+            height: 300px;
+            width: 100%;
+            max-width: 500px;
+            margin: 20px auto;
+            border-radius: 10px;
+            display: none;
+        }
+    </style>
+    <!-- لود کتابخانه Google Maps (اختیاری) -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
+</head>
+<body>
+    <h1>موقعیت شما 🌐</h1>
+    
+    <div class="location-info">
+        <h3>مختصات جغرافیایی:</h3>
+        <div class="coordinates">
+            <p><strong>عرض جغرافیایی (Latitude):</strong> <span id="lat">در حال بارگذاری...</span></p>
+            <p><strong>طول جغرافیایی (Longitude):</strong> <span id="lng">در حال بارگذاری...</span></p>
+            <p><strong>دقت:</strong> <span id="acc">در حال بارگذاری...</span> متر</p>
+        </div>
+        
+        <div id="map"></div>
+        
+        <a id="googleMapLink" class="map-link" target="_blank">مشاهده در Google Maps</a>
+        <br>
+        <a class="map-link" href="index.html" style="background-color: #4CAF50;">بازگشت به صفحه اصلی</a>
+    </div>
+
+    <script>
+        // دریافت داده‌های ذخیره شده
+        const lat = localStorage.getItem("userLatitude");
+        const lng = localStorage.getItem("userLongitude");
+        const acc = localStorage.getItem("userAccuracy");
+        
+        // نمایش داده‌ها
+        document.getElementById("lat").textContent = lat || "نامشخص";
+        document.getElementById("lng").textContent = lng || "نامشخص";
+        document.getElementById("acc").textContent = acc || "نامشخص";
+        
+        // ایجاد لینک Google Maps
+        if(lat && lng) {
+            const mapLink = document.getElementById("googleMapLink");
+            mapLink.href = `https://www.google.com/maps?q=${lat},${lng}`;
+            mapLink.textContent = `مشاهده موقعیت در Google Maps`;
+        }
+        
+        // نمایش نقشه Google (اگر API Key دارید)
+        function initMap() {
+            if(lat && lng) {
+                const location = { lat: parseFloat(lat), lng: parseFloat(lng) };
+                const map = new google.maps.Map(document.getElementById("map"), {
+                    zoom: 15,
+                    center: location
+                });
+                new google.maps.Marker({
+                    position: location,
+                    map: map
+                });
+                document.getElementById("map").style.display = "block";
+            }
+        }
+        
+        // اگر API Key ندارید، این تابع را فراخوانی نکنید
+        // initMap();
+        
+        // روش جایگزین: استفاده از OpenStreetMap (نیاز به API Key ندارد)
+        function showOSMMap() {
+            if(lat && lng) {
+                const mapElement = document.getElementById("map");
+                mapElement.innerHTML = `<iframe 
+                    width="100%" 
+                    height="300" 
+                    frameborder="0" 
+                    scrolling="no" 
+                    marginheight="0" 
+                    marginwidth="0" 
+                    src="https://www.openstreetmap.org/export/embed.html?bbox=${lng-0.01},${lat-0.01},${lng+0.01},${lat+0.01}&layer=mapnik&marker=${lat},${lng}"
+                    style="border-radius: 10px;">
+                </iframe>`;
+                mapElement.style.display = "block";
+            }
+        }
+        
+        // برای استفاده از OpenStreetMap، خط زیر را فعال کنید
+        // showOSMMap();
+    </script>
+</body>
+</html>

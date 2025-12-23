@@ -10,52 +10,28 @@
             text-align: center;
             direction: rtl;
             padding: 50px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            margin: 0;
+            background-color: #f5f5f5;
         }
-        .container {
-            max-width: 700px;
-            margin: 0 auto;
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .btn {
+        button {
             padding: 15px 30px;
             font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
-            margin: 10px;
-            transition: all 0.3s;
+            margin-top: 20px;
         }
-        .btn-primary {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-            color: white;
-        }
-        .btn-secondary {
-            background: linear-gradient(135deg, #2196F3, #1976d2);
-            color: white;
-        }
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        button:hover {
+            background-color: #45a049;
         }
         #message {
-            margin: 30px 0;
-            padding: 20px;
-            border-radius: 10px;
-            background: #f8f9fa;
-            min-height: 80px;
+            margin-top: 20px;
+            color: #555;
+            padding: 15px;
+            border-radius: 8px;
+            min-height: 60px;
         }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
         .loading {
             display: inline-block;
             width: 20px;
@@ -69,202 +45,157 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .stats {
-            background: #e8f5e9;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📍 دریافت و ذخیره موقعیت</h1>
-        
-        <div class="stats">
-            <p>موقعیت‌های ذخیره شده: <span id="locationCount">0</span></p>
-            <p>آخرین بروزرسانی: <span id="lastUpdate">ندارد</span></p>
-        </div>
-        
-        <button id="getLocationBtn" class="btn btn-primary" onclick="getLocation()">
-            دریافت موقعیت من
-        </button>
-        
-        <div id="message">
-            برای دریافت موقعیت جغرافیایی، دکمه بالا را کلیک کنید.
-        </div>
-        
-        <div>
-            <a href="show-location.html" class="btn btn-secondary">
-                مشاهده تمام موقعیت‌ها
-            </a>
-        </div>
-        
-        <div style="margin-top: 30px; font-size: 14px; color: #666;">
-            <p>موقعیت‌ها در سرور GitHub ذخیره می‌شوند و برای همه قابل مشاهده هستند.</p>
-        </div>
-    </div>
+    <h1>خوش آمدید! 🌍</h1>
+    <p>برای نمایش موقعیت شما، دکمه زیر را کلیک کنید.</p>
+    <button onclick="getLocation()" id="locationBtn">دریافت موقعیت من</button>
+    <p id="message"></p>
 
     <script>
-        // تنظیمات GitHub
+        // تنظیمات GitHub - اینجا باید اطلاعات خودتون رو بذارید
         const GITHUB_CONFIG = {
-            username: 'YOUR_GITHUB_USERNAME', // نام کاربری GitHub خود را وارد کنید
-            repo: 'location-tracker', // نام ریپازیتوری
-            token: 'YOUR_GITHUB_TOKEN', // توکن دسترسی GitHub
-            dataFile: 'locations.json' // فایل ذخیره‌سازی
+            username: 'amircrypto210-create', // نام کاربری GitHub شما
+            repo: 'amirbordbarweb',           // نام ریپازیتوری
+            token: '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', // توکن شما
+            dataFile: 'locations.json'        // فایل ذخیره‌سازی
         };
         
-        // نمایش پیام
-        function showMessage(text, type = '') {
-            const messageDiv = document.getElementById('message');
-            messageDiv.innerHTML = text;
-            messageDiv.className = type;
-        }
-        
-        // دریافت موقعیت
-        async function getLocation() {
-            const btn = document.getElementById('getLocationBtn');
+        function getLocation() {
+            const message = document.getElementById("message");
+            const button = document.getElementById("locationBtn");
             
-            // بررسی پشتیبانی
             if (!navigator.geolocation) {
-                showMessage('مرورگر شما از موقعیت‌یابی پشتیبانی نمی‌کند.', 'error');
+                message.innerHTML = "مرورگر شما از قابلیت موقعیت‌یابی پشتیبانی نمی‌کند.";
                 return;
             }
             
-            // غیرفعال کردن دکمه
-            btn.disabled = true;
-            btn.innerHTML = '<span class="loading"></span> در حال دریافت...';
+            // غیرفعال کردن دکمه و نمایش لودینگ
+            button.disabled = true;
+            button.innerHTML = '<span class="loading"></span> در حال دریافت...';
+            message.innerHTML = "در حال دریافت موقعیت...";
             
-            showMessage('در حال درخواست مجوز موقعیت...');
-            
-            // دریافت موقعیت
             navigator.geolocation.getCurrentPosition(
-                // موفقیت
-                async (position) => {
+                async function(position) {
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
                     const acc = position.coords.accuracy;
                     
-                    showMessage(`
-                        <strong>✅ موقعیت دریافت شد!</strong><br>
-                        مختصات: ${lat.toFixed(6)}, ${lng.toFixed(6)}<br>
-                        دقت: ${acc.toFixed(2)} متر<br>
-                        <span id="saveStatus">در حال ذخیره در سرور...</span>
-                    `, 'success');
+                    message.innerHTML = "📍 موقعیت دریافت شد! در حال ذخیره در سرور...";
                     
                     try {
-                        // ذخیره در GitHub
-                        await saveToGitHub(lat, lng, acc);
+                        // ذخیره در سرور GitHub
+                        const saved = await saveToGitHub(lat, lng, acc);
                         
-                        document.getElementById('saveStatus').innerHTML = 
-                            '<strong>✅ در سرور ذخیره شد!</strong>';
-                        
-                        // به‌روزرسانی تعداد
-                        await updateStats();
-                        
-                        // فعال کردن دکمه
-                        btn.disabled = false;
-                        btn.textContent = '📍 دریافت موقعیت جدید';
-                        
-                        // هدایت بعد از 3 ثانیه
-                        setTimeout(() => {
-                            window.location.href = "show-location.html";
-                        }, 3000);
+                        if (saved) {
+                            message.innerHTML = "✅ موقعیت با موفقیت در سرور ذخیره شد!";
+                            
+                            // هدایت به صفحه نمایش
+                            setTimeout(() => {
+                                window.location.href = "show-location.html";
+                            }, 2000);
+                        } else {
+                            message.innerHTML = "⚠️ موقعیت دریافت شد اما در سرور ذخیره نشد.";
+                            button.disabled = false;
+                            button.textContent = 'تلاش مجدد';
+                        }
                         
                     } catch (error) {
-                        showMessage('❌ خطا در ذخیره موقعیت: ' + error.message, 'error');
-                        btn.disabled = false;
-                        btn.textContent = '🔄 تلاش مجدد';
+                        message.innerHTML = "❌ خطا در ذخیره موقعیت: " + error.message;
+                        button.disabled = false;
+                        button.textContent = 'تلاش مجدد';
                     }
                 },
-                
-                // خطا
-                (error) => {
-                    let errorMsg = '';
+                function(error) {
+                    let errorMessage;
                     switch(error.code) {
-                        case 1:
-                            errorMsg = 'دسترسی به موقعیت رد شد. لطفاً مجوز را فعال کنید.';
+                        case error.PERMISSION_DENIED:
+                            errorMessage = "دسترسی به موقعیت رد شد. لطفاً مجوز را در مرورگر فعال کنید.";
                             break;
-                        case 2:
-                            errorMsg = 'موقعیت در دسترس نیست. GPS را فعال کنید.';
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = "اطلاعات موقعیت در دسترس نیست.";
                             break;
-                        case 3:
-                            errorMsg = 'دریافت موقعیت زمان‌بر شد.';
+                        case error.TIMEOUT:
+                            errorMessage = "دریافت موقعیت زمان‌بر شد.";
                             break;
                         default:
-                            errorMsg = 'خطای ناشناخته.';
+                            errorMessage = "خطای ناشناخته رخ داد.";
                     }
-                    
-                    showMessage('❌ ' + errorMsg, 'error');
-                    btn.disabled = false;
-                    btn.textContent = '🔄 تلاش مجدد';
+                    message.innerHTML = "خطا: " + errorMessage;
+                    button.disabled = false;
+                    button.textContent = 'تلاش مجدد';
                 },
-                
-                // تنظیمات
                 {
                     enableHighAccuracy: true,
-                    timeout: 15000,
+                    timeout: 10000,
                     maximumAge: 0
                 }
             );
         }
         
         // ذخیره موقعیت در GitHub
-        async function saveToGitHub(lat, lng, acc) {
+        async function saveToGitHub(latitude, longitude, accuracy) {
             try {
-                // 1. دریافت داده‌های موجود
-                const existingData = await fetchLocations();
+                // 1. دریافت داده‌های موجود از GitHub
+                const existingData = await fetchLocationsFromGitHub();
                 
-                // 2. اضافه کردن موقعیت جدید
+                // 2. ایجاد موقعیت جدید
                 const newLocation = {
                     id: Date.now(),
-                    latitude: lat,
-                    longitude: lng,
-                    accuracy: acc,
+                    latitude: latitude,
+                    longitude: longitude,
+                    accuracy: accuracy,
                     timestamp: new Date().toISOString(),
                     timestampPersian: new Date().toLocaleString('fa-IR'),
-                    deviceInfo: navigator.userAgent.substring(0, 100),
-                    ip: await getIPAddress()
+                    device: navigator.userAgent.substring(0, 100)
                 };
                 
-                existingData.locations.unshift(newLocation); // اضافه به ابتدای لیست
+                // 3. اضافه کردن به لیست (جدیدترین اول)
+                existingData.locations.unshift(newLocation);
                 
-                // محدود کردن به 100 مورد آخر
-                if (existingData.locations.length > 100) {
-                    existingData.locations = existingData.locations.slice(0, 100);
+                // 4. محدود کردن تعداد (آخرین 50 موقعیت)
+                if (existingData.locations.length > 50) {
+                    existingData.locations = existingData.locations.slice(0, 50);
                 }
                 
-                // 3. آپلود به GitHub
+                // 5. ذخیره در GitHub
                 await uploadToGitHub(existingData);
                 
                 return true;
                 
             } catch (error) {
-                console.error('Error saving to GitHub:', error);
+                console.error('خطا در ذخیره موقعیت:', error);
                 throw error;
             }
         }
         
         // دریافت داده‌ها از GitHub
-        async function fetchLocations() {
+        async function fetchLocationsFromGitHub() {
+            const url = `https://raw.githubusercontent.com/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}/main/${GITHUB_CONFIG.dataFile}`;
+            
             try {
-                const url = `https://raw.githubusercontent.com/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}/main/${GITHUB_CONFIG.dataFile}`;
-                const response = await fetch(url + '?t=' + Date.now()); // جلوگیری از کش
+                const response = await fetch(url + '?t=' + Date.now());
                 
                 if (response.ok) {
                     const data = await response.json();
                     return data;
+                } else {
+                    // اگر فایل وجود نداشت، ساختار اولیه برگردان
+                    return {
+                        locations: [],
+                        lastUpdated: new Date().toISOString(),
+                        totalCount: 0
+                    };
                 }
             } catch (error) {
-                console.log('No existing data or error:', error);
+                // در صورت خطا، ساختار اولیه برگردان
+                return {
+                    locations: [],
+                    lastUpdated: new Date().toISOString(),
+                    totalCount: 0
+                };
             }
-            
-            // اگر فایل وجود نداشت، ساختار اولیه ایجاد کن
-            return {
-                locations: [],
-                lastUpdated: new Date().toISOString(),
-                totalCount: 0
-            };
         }
         
         // آپلود به GitHub
@@ -279,25 +210,25 @@
             const content = JSON.stringify(data, null, 2);
             const contentEncoded = btoa(unescape(encodeURIComponent(content)));
             
-            // دریافت SHA فایل موجود (برای update)
+            // دریافت SHA فایل موجود (اگر وجود دارد)
             let sha = '';
             try {
-                const existingFile = await fetch(apiUrl, {
+                const response = await fetch(apiUrl, {
                     headers: {
                         'Authorization': `token ${GITHUB_CONFIG.token}`,
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
                 
-                if (existingFile.ok) {
-                    const fileData = await existingFile.json();
+                if (response.ok) {
+                    const fileData = await response.json();
                     sha = fileData.sha;
                 }
             } catch (error) {
-                // فایل وجود ندارد، ایجاد جدید
+                // فایل وجود ندارد، پس می‌سازیم
             }
             
-            // درخواست آپلود
+            // آپلود فایل
             const response = await fetch(apiUrl, {
                 method: 'PUT',
                 headers: {
@@ -306,7 +237,7 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    message: `Add location - ${new Date().toLocaleString('fa-IR')}`,
+                    message: `افزودن موقعیت جدید - ${new Date().toLocaleString('fa-IR')}`,
                     content: contentEncoded,
                     sha: sha || undefined,
                     committer: {
@@ -317,45 +248,16 @@
             });
             
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'خطا در آپلود به GitHub');
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'خطا در آپلود به GitHub');
             }
             
             return await response.json();
         }
         
-        // دریافت آدرس IP
-        async function getIPAddress() {
-            try {
-                const response = await fetch('https://api.ipify.org?format=json');
-                const data = await response.json();
-                return data.ip;
-            } catch (error) {
-                return 'نامشخص';
-            }
-        }
-        
-        // به‌روزرسانی آمار
-        async function updateStats() {
-            try {
-                const data = await fetchLocations();
-                document.getElementById('locationCount').textContent = data.totalCount || data.locations.length;
-                document.getElementById('lastUpdate').textContent = 
-                    data.lastUpdated ? new Date(data.lastUpdated).toLocaleString('fa-IR') : 'ندارد';
-            } catch (error) {
-                console.log('Error updating stats:', error);
-            }
-        }
-        
-        // مقداردهی اولیه
-        window.onload = async function() {
-            // به‌روزرسانی آمار
-            await updateStats();
-            
-            // نمایش اطلاعات ذخیره‌سازی
-            console.log('Using GitHub storage');
-            console.log('Username:', GITHUB_CONFIG.username);
-            console.log('Repo:', GITHUB_CONFIG.repo);
+        // بررسی اولیه
+        window.onload = function() {
+            console.log('GitHub Config:', GITHUB_CONFIG.username, GITHUB_CONFIG.repo);
         };
     </script>
 </body>

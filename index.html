@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>اشتراک موقعیت</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Tahoma, sans-serif;
+            text-align: center;
+            padding: 20px;
+            direction: rtl;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 30px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        h3 {
+            color: #333;
+            margin-top: 0;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .coordinates {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-family: monospace;
+        }
+        .permission-note {
+            font-size: 12px;
+            color: #666;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+        .retry-button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+        .retry-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .retry-button:active {
+            transform: translateY(0);
+        }
+        .guide-content {
+            text-align: right;
+            padding-right: 15px;
+            margin: 15px 0;
+        }
+        .guide-content ol {
+            padding-right: 20px;
+            margin: 10px 0;
+        }
+        .guide-content li {
+            margin-bottom: 8px;
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px;
+                width: 95%;
+                margin: 10px;
+            }
+            .retry-button {
+                width: 100%;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>📍 در حال دریافت موقعیت</h2>
+        
+        <div class="loader" id="loader"></div>
+        
+        <div id="status" class="status">
+            درخواست دسترسی به موقعیت جغرافیایی...
+            <br>
+            <small>لطفاً اجازه دسترسی را در پنجره مرورگر تایید کنید</small>
+        </div>
+        
+        <div id="result" style="display: none;">
+            <div class="coordinates">
+                <div>عرض جغرافیایی: <span id="lat"></span></div>
+                <div>طول جغرافیایی: <span id="lng"></span></div>
+                <div>دقت: <span id="accuracy"></span> متر</div>
+                <div>زمان: <span id="time"></span></div>
+            </div>
+            
+            <div class="status success" style="margin-top: 20px;">
+                ✅ موقعیت شما با موفقیت دریافت شد
+            </div>
+        </div>
+        
+        <div id="errorSection" style="display: none;">
+            <div class="status error">
+                <h3>⚠️ خطا در دریافت موقعیت</h3>
+                <p id="errorMessage"></p>
+            </div>
+        </div>
+        
+        <div id="permissionGuide" style="display: none; margin-top: 15px;">
+            <div class="status warning">
+                <h3>🔧 راهنمای فعال‌سازی موقعیت</h3>
+                <div id="guideContent" class="guide-content"></div>
+                <button onclick="showDetailedGuide()" class="retry-button" style="background: #ff9800; margin-top: 10px;">
+                    نمایش راهنمای تصویری دقیق
+                </button>
+            </div>
+        </div>
+        
+        <div id="retrySection" style="display: none; margin-top: 20px;">
+            <button id="retryButton" class="retry-button">
+                🔄 تلاش مجدد برای دسترسی به موقعیت
+            </button>
+            <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                اگر همچنان خطا می‌دهد، از راهنمای بالا استفاده کنید
+            </p>
+        </div>
+        
+        <div class="permission-note">
+            <strong>توجه:</strong> موقعیت شما تنها یک بار دریافت شده و ذخیره نخواهد شد.
+            برای دریافت مجدد، از دکمه تلاش مجدد استفاده کنید.
+        </div>
+    </div>
+
+    <script>
+        // شناسه رهگیری از URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const trackId = urlParams.get('id') || 'unknown';
+        
+        // عناصر DOM
+        const loader = document.getElementById('loader');
+        const statusDiv = document.getElementById('status');
+        const resultDiv = document.getElementById('result');
+        const errorSection = document.getElementById('errorSection');
+        const errorMessage = document.getElementById('errorMessage');
+        const permissionGuide = document.getElementById('permissionGuide');
+        const retrySection = document.getElementById('retrySection');
+        const retryButton = document.getElementById('retryButton');
+        
+        // تابع اصلی برای دریافت موقعیت
+        function requestLocation() {
+            // بررسی پشتیبانی مرورگر
+            if (!navigator.geolocation) {
+                showError('مرورگر شما از موقعیت‌یابی پشتیبانی نمی‌کند');
+                return;
+            }
+            
+            // بررسی HTTPS (برای امنیت بیشتر)
+            if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+                showWarning('برای استفاده از موقعیت‌یابی، نیاز به اتصال ایمن (HTTPS) دارید');
+                return;
+            }
+            
+            // تنظیمات برای دریافت دقیق
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 15000, // 15 ثانیه زمان انتظار
+                maximumAge: 0   // عدم استفاده از موقعیت کش شده
+            };
+            
+            // نمایش وضعیت
+            statusDiv.innerHTML = 'در حال دریافت موقعیت...<br><small>لطفاً کمی صبر کنید</small>';
+            
+            // درخواست موقعیت
+            navigator.geolocation.getCurrentPosition(
+                // موفقیت
+                function(position) {
+                    handleSuccess(position);
+                },
+                // خطا
+                function(error) {
+                    handleGeolocationError(error);
+                },
+                options
+            );
+        }
+        
+        // تابع مدیریت موفقیت
+        function handleSuccess(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const accuracy = position.coords.accuracy;
+            const timestamp = new Date(position.timestamp);
+            
+            // مخفی کردن لودر
+            loader.style.display = 'none';
+            
+            // نمایش نتیجه
+            document.getElementById('lat').textContent = lat.toFixed(6);
+            document.getElementById('lng').textContent = lng.toFixed(6);
+            document.getElementById('accuracy').textContent = Math.round(accuracy);
+            document.getElementById('time').textContent = timestamp.toLocaleTimeString('fa-IR');
+            
+            resultDiv.style.display = 'block';
+            statusDiv.style.display = 'none';
+            
+            // مخفی کردن بخش‌های خطا در صورت وجود
+            errorSection.style.display = 'none';
+            permissionGuide.style.display = 'none';
+            retrySection.style.display = 'none';
+            
+            // ارسال به سرور
+            sendToServer(lat, lng, accuracy, trackId);
+            
+            // نمایش دکمه جدید برای گرفتن موقعیت جدید
+            setTimeout(() => {
+                const newLocationBtn = document.createElement('button');
+                newLocationBtn.className = 'retry-button';
+                newLocationBtn.innerHTML = '📍 دریافت موقعیت جدید';
+                newLocationBtn.onclick = function() {
+                    resultDiv.style.display = 'none';
+                    loader.style.display = 'block';
+                    statusDiv.style.display = 'block';
+                    statusDiv.innerHTML = 'در حال دریافت موقعیت جدید...';
+                    this.remove();
+                    setTimeout(requestLocation, 500);
+                };
+                resultDiv.appendChild(newLocationBtn);
+            }, 1000);
+        }
+        
+        // تابع مدیریت خطاهای موقعیت‌یابی
+        function handleGeolocationError(error) {
+            loader.style.display = 'none';
+            statusDiv.style.display = 'none';
+            
+            let message = '';
+            let showGuide = false;
+            
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    message = 'دسترسی به موقعیت جغرافیایی رد شد.';
+                    showGuide = true;
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    message = 'اطلاعات موقعیت در دسترس نیست (ممکن است GPS خاموش باشد)';
+                    break;
+                case error.TIMEOUT:
+                    message = 'دریافت موقعیت زمان‌بر شد. لطفاً دوباره تلاش کنید.';
+                    break;
+                default:
+                    message = 'خطای ناشناخته در دریافت موقعیت';
+            }
+            
+            errorMessage.textContent = message;
+            errorSection.style.display = 'block';
+            
+            // اگر دسترسی رد شده، راهنما و دکمه تلاش مجدد نمایش داده شود
+            if (showGuide) {
+                showBrowserGuide();
+                permissionGuide.style.display = 'block';
+                retrySection.style.display = 'block';
+                
+                // تنظیم event listener برای دکمه تلاش مجدد
+                retryButton.onclick = function() {
+                    resetAndRetry();
+                };
+            }
+        }
+        
+        // تابع نمایش راهنمای مرورگر
+        function showBrowserGuide() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            let guideHTML = '';
+            
+            if (userAgent.includes('chrome') || userAgent.includes('chromium')) {
+                guideHTML = `
+                    <ol>
+                        <li>روی آیکون قفل (🔒) یا اطلاعات (ⓘ) در نوار آدرس کلیک کنید</li>
+                        <li>گزینه "Site settings" یا "تنظیمات سایت" را انتخاب کنید</li>
+                        <li>در بخش "Location" یا "موقعیت" گزینه "Allow" یا "اجازه" را انتخاب کنید</li>
+                        <li>صفحه را ببندید و دوباره باز کنید یا از دکمه تلاش مجدد استفاده کنید</li>
+                    </ol>
+                `;
+            } else if (userAgent.includes('firefox')) {
+                guideHTML = `
+                    <ol>
+                        <li>روی آیکون قفل (🔒) در نوار آدرس کلیک کنید</li>
+                        <li>روی فلش کنار "Connection secure" کلیک کنید</li>
+                        <li>گزینه "Allow" را برای "Location" انتخاب کنید</li>
+                        <li>از دکمه تلاش مجدد استفاده کنید</li>
+                    </ol>
+                `;
+            } else if (userAgent.includes('safari')) {
+                guideHTML = `
+                    <ol>
+                        <li>به Settings > Safari بروید</li>
+                        <li>گزینه "Location Services" را پیدا کنید</li>
+                        <li>سایت ما را در لیست پیدا کرده و روی "Allow" تنظیم کنید</li>
+                        <li>از دکمه تلاش مجدد استفاده کنید</li>
+                    </ol>
+                `;
+            } else if (userAgent.includes('edge')) {
+                guideHTML = `
+                    <ol>
+                        <li>روی آیکون قفل (🔒) در نوار آدرس کلیک کنید</li>
+                        <li>گزینه "Permissions for this site" را انتخاب کنید</li>
+                        <li>در بخش "Location" گزینه "Allow" را انتخاب کنید</li>
+                        <li>از دکمه تلاش مجدد استفاده کنید</li>
+                    </ol>
+                `;
+            } else {
+                guideHTML = `
+                    <p>لطفاً مراحل زیر را انجام دهید:</p>
+                    <ol>
+                        <li>به تنظیمات مرورگر خود بروید</li>
+                        <li>بخش "Site settings" یا "تنظیمات سایت" را پیدا کنید</li>
+                        <li>گزینه "Location" یا "موقعیت" را پیدا کنید</li>
+                        <li>دسترسی موقعیت را برای این سایت فعال کنید</li>
+                        <li>از دکمه تلاش مجدد استفاده کنید</li>
+                    </ol>
+                `;
+            }
+            
+            document.getElementById('guideContent').innerHTML = guideHTML;
+        }
+        
+        // تابع نمایش راهنمای تصویری دقیق
+        function showDetailedGuide() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            let url = '';
+            
+            if (userAgent.includes('chrome')) {
+                url = 'https://support.google.com/chrome/answer/142065?co=GENIE.Platform%3DDesktop&hl=fa';
+            } else if (userAgent.includes('firefox')) {
+                url = 'https://support.mozilla.org/fa/kb/websites-request-your-location';
+            } else if (userAgent.includes('safari')) {
+                url = 'https://support.apple.com/fa-ir/guide/safari/sfri40721/mac';
+            } else if (userAgent.includes('edge')) {
+                url = 'https://support.microsoft.com/fa-ir/microsoft-edge/%D8%A7%D8%AC%D8%A7%D8%B2%D9%87-%D9%85%D9%88%D9%82%D8%B9%DB%8C%D8%AA-%D8%AF%D8%B1-microsoft-edge-90b7a8d7-5f3b-408a-9d0d-4d3c7c8b3555';
+            } else {
+                url = 'https://www.google.com/search?q=how+to+enable+location+permission+browser';
+            }
+            
+            window.open(url, '_blank');
+        }
+        
+        // تابع ریست و تلاش مجدد
+        function resetAndRetry() {
+            // مخفی کردن بخش‌های خطا و راهنما
+            errorSection.style.display = 'none';
+            permissionGuide.style.display = 'none';
+            retrySection.style.display = 'none';
+            
+            // نمایش مجدد لودر و وضعیت
+            loader.style.display = 'block';
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = 'در حال تلاش مجدد...<br><small>لطفاً منتظر بمانید</small>';
+            
+            // تاخیر قبل از تلاش مجدد
+            setTimeout(() => {
+                requestLocation();
+            }, 1000);
+        }
+        
+        // تابع ارسال به سرور
+        function sendToServer(lat, lng, accuracy, id) {
+            console.log('موقعیت دریافت شد:');
+            console.log('شناسه:', id);
+            console.log('عرض جغرافیایی:', lat);
+            console.log('طول جغرافیایی:', lng);
+            console.log('دقت:', accuracy, 'متر');
+            
+            // اینجا می‌توانید موقعیت را به سرور ارسال کنید
+            // مثال:
+            /*
+            fetch('https://yourserver.com/api/location', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    id: id,
+                    latitude: lat,
+                    longitude: lng,
+                    accuracy: accuracy,
+                    timestamp: new Date().toISOString()
+                })
+            });
+            */
+        }
+        
+        // تابع نمایش خطا
+        function showError(message) {
+            loader.style.display = 'none';
+            statusDiv.style.display = 'none';
+            errorMessage.textContent = message;
+            errorSection.style.display = 'block';
+        }
+        
+        // تابع نمایش هشدار
+        function showWarning(message) {
+            loader.style.display = 'none';
+            statusDiv.style.display = 'none';
+            errorMessage.textContent = message;
+            errorSection.style.display = 'block';
+            
+            // اضافه کردن دکمه برای ادامه با وجود هشدار
+            const continueBtn = document.createElement('button');
+            continueBtn.className = 'retry-button';
+            continueBtn.textContent = 'ادامه با وجود هشدار';
+            continueBtn.style.background = '#ff9800';
+            continueBtn.onclick = function() {
+                errorSection.style.display = 'none';
+                loader.style.display = 'block';
+                statusDiv.style.display = 'block';
+                statusDiv.innerHTML = 'در حال دریافت موقعیت...';
+                setTimeout(requestLocation, 500);
+            };
+            
+            errorSection.querySelector('.status.error').appendChild(continueBtn);
+        }
+        
+        // هنگام لود صفحه، درخواست موقعیت را شروع کن
+        window.onload = function() {
+            // اضافه کردن شناسه به پیام وضعیت
+            statusDiv.innerHTML = `درخواست دسترسی به موقعیت جغرافیایی...<br>
+                                  <small>شناسه رهگیری: ${trackId}</small>`;
+            
+            // تاخیر کوچک برای اطمینان از لود کامل صفحه
+            setTimeout(() => {
+                requestLocation();
+            }, 500);
+        };
+    </script>
+</body>
+</html>

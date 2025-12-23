@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سایت GPS + پنل مدیریت امن</title>
+    <title>سایت GPS + پنل مدیریت</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         /* استایل کلی */
@@ -63,14 +63,6 @@
             transform: translateY(-2px);
         }
         
-        .logout-btn {
-            background: #f56565;
-        }
-        
-        .logout-btn:hover {
-            background: #e53e3e;
-        }
-        
         /* محتوای اصلی */
         .container {
             max-width: 1200px;
@@ -96,90 +88,6 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* صفحه لاگین */
-        .login-container {
-            max-width: 400px;
-            margin: 100px auto;
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-        }
-        
-        .login-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .login-header h2 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        
-        .login-header p {
-            color: #666;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .password-input {
-            position: relative;
-        }
-        
-        .toggle-password {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #666;
-            cursor: pointer;
-        }
-        
-        .alert {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        
-        .alert-danger {
-            background: #fed7d7;
-            color: #c53030;
-            border: 1px solid #fc8181;
-        }
-        
-        .alert-success {
-            background: #c6f6d5;
-            color: #22543d;
-            border: 1px solid #9ae6b4;
         }
         
         /* صفحه اصلی */
@@ -324,10 +232,6 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
         
-        .btn-block {
-            width: 100%;
-        }
-        
         .btn-secondary {
             background: #6c757d;
         }
@@ -338,16 +242,6 @@
         
         .btn-danger {
             background: #dc3545;
-        }
-        
-        /* فوت */
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            color: #666;
-            font-size: 0.9em;
         }
         
         /* پاسخگو */
@@ -370,87 +264,34 @@
                 display: block;
                 overflow-x: auto;
             }
-            
-            .login-container {
-                margin: 50px 20px;
-                padding: 30px 20px;
-            }
         }
     </style>
 </head>
 <body>
     <!-- نوار ناوبری -->
-    <nav class="navbar" id="navbar" style="display: none;">
+    <nav class="navbar">
         <div class="logo">
             <span>📍</span>
-            <span>سایت موقعیت‌یابی امن</span>
+            <span>سایت موقعیت‌یابی</span>
         </div>
         <div class="nav-links">
             <button class="nav-btn" onclick="showPage('home')">🏠 صفحه اصلی</button>
-            <button class="nav-btn" onclick="showPage('admin')" id="admin-btn">👨‍💼 پنل مدیریت</button>
-            <button class="nav-btn logout-btn" onclick="logout()">🚪 خروج</button>
+            <button class="nav-btn" onclick="showPage('admin')">👨‍💼 پنل مدیریت</button>
         </div>
     </nav>
     
-    <!-- صفحه لاگین -->
-    <div id="login-page">
-        <div class="login-container">
-            <div class="login-header">
-                <h2>🔐 ورود به پنل مدیریت</h2>
-                <p>لطفا نام کاربری و رمز عبور را وارد کنید</p>
-            </div>
-            
-            <div class="alert alert-danger" id="login-error">
-                نام کاربری یا رمز عبور اشتباه است
-            </div>
-            
-            <div class="alert alert-success" id="login-success">
-                ورود موفقیت‌آمیز! در حال انتقال...
-            </div>
-            
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="username">نام کاربری</label>
-                    <input type="text" id="username" class="form-control" placeholder="admin" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">رمز عبور</label>
-                    <div class="password-input">
-                        <input type="password" id="password" class="form-control" placeholder="رمز عبور" required>
-                        <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
-                    </div>
-                </div>
-                
-                <div class="form-group" style="text-align: left;">
-                    <input type="checkbox" id="remember" checked>
-                    <label for="remember" style="display: inline;">مرا به خاطر بسپار</label>
-                </div>
-                
-                <button type="submit" class="btn btn-block">ورود به پنل</button>
-            </form>
-            
-            <div class="footer" style="margin-top: 30px;">
-                <p>⚠️ برای تست: نام کاربری: <strong>admin</strong> - رمز عبور: <strong>123456</strong></p>
-                <p style="margin-top: 10px; font-size: 0.8em; color: #888;">
-                    این اطلاعات فقط برای تست است. بعد از اولین ورود رمز عبور را تغییر دهید.
-                </p>
-            </div>
-        </div>
-    </div>
-    
-    <!-- محتوای اصلی (بعد از لاگین) -->
-    <div class="container" id="main-content" style="display: none;">
+    <!-- محتوای اصلی -->
+    <div class="container">
         <!-- صفحه اصلی -->
         <div id="home-page" class="page-card active">
             <div class="hero">
-                <h1>🌍 به سایت موقعیت‌یابی خوش آمدید</h1>
-                <p>این سایت موقعیت جغرافیایی شما را دریافت و در حافظه مرورگر ذخیره می‌کند</p>
+                <h1>🌍 به سایت ما خوش آمدید</h1>
+                <p>این سایت موقعیت جغرافیایی شما را دریافت و ذخیره می‌کند</p>
                 
                 <div class="location-box">
                     <h3>📍 موقعیت فعلی شما</h3>
                     <div id="location-info">
-                        <p>برای دریافت موقعیت روی دکمه زیر کلیک کنید</p>
+                        <p>در حال دریافت موقعیت...</p>
                     </div>
                     <div id="location-data" class="location-data" style="display: none;">
                         <p>عرض جغرافیایی: <span id="lat-value">--</span></p>
@@ -465,11 +306,11 @@
                 <button class="btn btn-success" onclick="getLocation()">📡 دریافت موقعیت</button>
                 <button class="btn" onclick="sendLocationToStorage()">💾 ذخیره موقعیت</button>
                 
-                <div class="footer">
-                    <p>⚠️ نکات فنی:</p>
-                    <p>• برای دریافت GPS دسترسی مرورگر را تایید کنید</p>
-                    <p>• داده‌ها در حافظه مرورگر ذخیره می‌شوند</p>
-                    <p>• پنل مدیریت با رمز عبور محافظت می‌شود</p>
+                <div style="margin-top: 40px; color: #666; font-size: 0.9em;">
+                    <p>⚠️ برای عملکرد صحیح:</p>
+                    <p>1. دسترسی GPS را فعال کنید</p>
+                    <p>2. از مرورگر مدرن استفاده کنید</p>
+                    <p>3. در صورت نیاز HTTPS را فعال کنید</p>
                 </div>
             </div>
         </div>
@@ -481,7 +322,6 @@
                 <div>
                     <button class="btn" onclick="refreshLocations()">🔄 به‌روزرسانی</button>
                     <button class="btn btn-danger" onclick="clearAllLocations()">🗑️ حذف همه</button>
-                    <button class="btn btn-secondary" onclick="showChangePassword()">🔐 تغییر رمز</button>
                 </div>
             </div>
             
@@ -526,273 +366,20 @@
                     </tbody>
                 </table>
             </div>
-            
-            <div class="footer">
-                <p>شما با حساب <strong id="current-user">admin</strong> وارد شده‌اید</p>
-                <p>آخرین ورود: <span id="last-login">--</span></p>
-            </div>
         </div>
     </div>
-
-    <!-- مودال تغییر رمز -->
-    <div id="password-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;">
-        <div style="background: white; padding: 30px; border-radius: 10px; max-width: 400px; width: 90%;">
-            <h3 style="margin-bottom: 20px;">🔐 تغییر رمز عبور</h3>
-            
-            <div class="alert alert-danger" id="password-error" style="display: none;"></div>
-            <div class="alert alert-success" id="password-success" style="display: none;"></div>
-            
-            <div class="form-group">
-                <label>رمز عبور فعلی</label>
-                <input type="password" id="current-password" class="form-control">
-            </div>
-            
-            <div class="form-group">
-                <label>رمز عبور جدید</label>
-                <input type="password" id="new-password" class="form-control">
-            </div>
-            
-            <div class="form-group">
-                <label>تکرار رمز عبور جدید</label>
-                <input type="password" id="confirm-password" class="form-control">
-            </div>
-            
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="btn" onclick="changePassword()">تغییر رمز</button>
-                <button class="btn btn-secondary" onclick="hidePasswordModal()">انصراف</button>
-            </div>
-        </div>
-    </div>
-
+    
     <!-- اسکریپت‌های جاوااسکریپت -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // کلیدهای ذخیره‌سازی
+        // داده‌ها در localStorage ذخیره می‌شوند
         const STORAGE_KEY = 'gps_locations';
-        const AUTH_KEY = 'gps_auth';
-        const SESSION_KEY = 'gps_session';
-        
-        // تنظیمات اولیه (می‌توانید تغییر دهید)
-        const DEFAULT_USERNAME = 'admin';
-        const DEFAULT_PASSWORD = '123456';
-        
         let currentLocation = null;
         let map = null;
         let markers = [];
-        let isLoggedIn = false;
-        
-        // بررسی وضعیت ورود
-        function checkLogin() {
-            const session = localStorage.getItem(SESSION_KEY);
-            const auth = localStorage.getItem(AUTH_KEY);
-            
-            if (session === 'true') {
-                // اگر کاربر قبلا وارد شده
-                showMainContent();
-                isLoggedIn = true;
-                return;
-            }
-            
-            // اگر اطلاعات لاگین وجود ندارد، تنظیمات پیش‌فرض را ایجاد کن
-            if (!auth) {
-                const defaultAuth = {
-                    username: DEFAULT_USERNAME,
-                    password: DEFAULT_PASSWORD,
-                    lastLogin: null,
-                    loginCount: 0
-                };
-                localStorage.setItem(AUTH_KEY, JSON.stringify(defaultAuth));
-            }
-            
-            // نمایش صفحه لاگین
-            showLoginPage();
-        }
-        
-        // نمایش صفحه لاگین
-        function showLoginPage() {
-            document.getElementById('login-page').style.display = 'block';
-            document.getElementById('main-content').style.display = 'none';
-            document.getElementById('navbar').style.display = 'none';
-            isLoggedIn = false;
-        }
-        
-        // نمایش محتوای اصلی
-        function showMainContent() {
-            document.getElementById('login-page').style.display = 'none';
-            document.getElementById('main-content').style.display = 'block';
-            document.getElementById('navbar').style.display = 'flex';
-            
-            // آپدیت اطلاعات کاربر
-            updateUserInfo();
-            
-            // بارگذاری داده‌ها
-            refreshLocations();
-            
-            // نمایش صفحه پیش‌فرض
-            showPage('home');
-        }
-        
-        // ورود به سیستم
-        function login(event) {
-            if (event) event.preventDefault();
-            
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-            const remember = document.getElementById('remember').checked;
-            
-            // دریافت اطلاعات احراز هویت
-            const authData = JSON.parse(localStorage.getItem(AUTH_KEY) || '{}');
-            
-            // بررسی نام کاربری و رمز عبور
-            if (username === authData.username && password === authData.password) {
-                // به‌روزرسانی آمار ورود
-                authData.lastLogin = new Date().toISOString();
-                authData.loginCount = (authData.loginCount || 0) + 1;
-                localStorage.setItem(AUTH_KEY, JSON.stringify(authData));
-                
-                // ذخیره سشن
-                if (remember) {
-                    localStorage.setItem(SESSION_KEY, 'true');
-                } else {
-                    // فقط برای این جلسه
-                    sessionStorage.setItem(SESSION_KEY, 'true');
-                }
-                
-                // نمایش پیام موفقیت
-                document.getElementById('login-error').style.display = 'none';
-                document.getElementById('login-success').style.display = 'block';
-                
-                // انتقال به صفحه اصلی بعد از تاخیر
-                setTimeout(() => {
-                    showMainContent();
-                    isLoggedIn = true;
-                }, 1000);
-                
-            } else {
-                // نمایش خطا
-                document.getElementById('login-success').style.display = 'none';
-                document.getElementById('login-error').style.display = 'block';
-                
-                // تکان دادن فرم
-                document.getElementById('login-form').style.animation = 'none';
-                setTimeout(() => {
-                    document.getElementById('login-form').style.animation = 'shake 0.5s';
-                }, 10);
-            }
-        }
-        
-        // خروج از سیستم
-        function logout() {
-            if (confirm('آیا مطمئن هستید که می‌خواهید خارج شوید؟')) {
-                localStorage.removeItem(SESSION_KEY);
-                sessionStorage.removeItem(SESSION_KEY);
-                showLoginPage();
-                
-                // ریست کردن فرم
-                document.getElementById('username').value = '';
-                document.getElementById('password').value = '';
-                document.getElementById('login-error').style.display = 'none';
-                document.getElementById('login-success').style.display = 'none';
-            }
-        }
-        
-        // به‌روزرسانی اطلاعات کاربر
-        function updateUserInfo() {
-            const authData = JSON.parse(localStorage.getItem(AUTH_KEY) || '{}');
-            document.getElementById('current-user').textContent = authData.username || 'admin';
-            
-            if (authData.lastLogin) {
-                const lastLoginDate = new Date(authData.lastLogin);
-                document.getElementById('last-login').textContent = lastLoginDate.toLocaleString('fa-IR');
-            }
-        }
-        
-        // تغییر رمز عبور
-        function showChangePassword() {
-            document.getElementById('password-modal').style.display = 'flex';
-        }
-        
-        function hidePasswordModal() {
-            document.getElementById('password-modal').style.display = 'none';
-            // پاک کردن فیلدها
-            document.getElementById('current-password').value = '';
-            document.getElementById('new-password').value = '';
-            document.getElementById('confirm-password').value = '';
-            document.getElementById('password-error').style.display = 'none';
-            document.getElementById('password-success').style.display = 'none';
-        }
-        
-        function changePassword() {
-            const currentPass = document.getElementById('current-password').value;
-            const newPass = document.getElementById('new-password').value;
-            const confirmPass = document.getElementById('confirm-password').value;
-            
-            // اعتبارسنجی
-            if (!currentPass || !newPass || !confirmPass) {
-                showPasswordError('لطفا همه فیلدها را پر کنید');
-                return;
-            }
-            
-            if (newPass.length < 4) {
-                showPasswordError('رمز عبور جدید باید حداقل ۴ کاراکتر باشد');
-                return;
-            }
-            
-            if (newPass !== confirmPass) {
-                showPasswordError('رمز عبور جدید و تکرار آن مطابقت ندارند');
-                return;
-            }
-            
-            // بررسی رمز عبور فعلی
-            const authData = JSON.parse(localStorage.getItem(AUTH_KEY) || '{}');
-            
-            if (currentPass !== authData.password) {
-                showPasswordError('رمز عبور فعلی اشتباه است');
-                return;
-            }
-            
-            // ذخیره رمز عبور جدید
-            authData.password = newPass;
-            localStorage.setItem(AUTH_KEY, JSON.stringify(authData));
-            
-            // نمایش موفقیت
-            document.getElementById('password-error').style.display = 'none';
-            document.getElementById('password-success').style.display = 'block';
-            document.getElementById('password-success').textContent = '✅ رمز عبور با موفقیت تغییر یافت';
-            
-            // بستن مودال بعد از ۲ ثانیه
-            setTimeout(() => {
-                hidePasswordModal();
-            }, 2000);
-        }
-        
-        function showPasswordError(message) {
-            document.getElementById('password-error').style.display = 'block';
-            document.getElementById('password-error').textContent = '❌ ' + message;
-        }
-        
-        // نمایش/مخفی کردن رمز عبور
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleBtn = document.querySelector('.toggle-password');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleBtn.textContent = '🙈';
-            } else {
-                passwordInput.type = 'password';
-                toggleBtn.textContent = '👁️';
-            }
-        }
         
         // تغییر صفحه
         function showPage(pageId) {
-            if (!isLoggedIn && pageId === 'admin') {
-                alert('لطفا ابتدا وارد شوید');
-                showLoginPage();
-                return;
-            }
-            
             // مخفی کردن همه صفحات
             document.querySelectorAll('.page-card').forEach(page => {
                 page.classList.remove('active');
@@ -802,7 +389,7 @@
             document.getElementById(pageId + '-page').classList.add('active');
             
             // اگر صفحه مدیریت است، نقشه را آپدیت کن
-            if (pageId === 'admin' && isLoggedIn) {
+            if (pageId === 'admin') {
                 setTimeout(initMap, 100);
                 refreshLocations();
             }
@@ -828,8 +415,7 @@
                         longitude: position.coords.longitude,
                         accuracy: Math.round(position.coords.accuracy),
                         timestamp: new Date().toLocaleString('fa-IR'),
-                        date: new Date().toISOString().split('T')[0],
-                        id: Date.now()
+                        date: new Date().toISOString().split('T')[0]
                     };
                     
                     // نمایش اطلاعات موقعیت
@@ -913,17 +499,11 @@
             
             // اضافه کردن موقعیت جدید
             const newLocation = {
-                ...currentLocation,
-                id: Date.now()
+                id: Date.now(),
+                ...currentLocation
             };
             
             locations.unshift(newLocation); // اضافه کردن به ابتدای آرایه
-            
-            // ذخیره فقط ۱۰۰ مورد آخر
-            if (locations.length > 100) {
-                locations = locations.slice(0, 100);
-            }
-            
             localStorage.setItem(STORAGE_KEY, JSON.stringify(locations));
             
             // نمایش پیام موفقیت
@@ -934,7 +514,7 @@
             `;
             
             // اگر صفحه مدیریت فعال است، آپدیت کن
-            if (document.getElementById('admin-page').classList.contains('active') && isLoggedIn) {
+            if (document.getElementById('admin-page').classList.contains('active')) {
                 refreshLocations();
             }
         }
@@ -1076,22 +656,13 @@
             const locations = loadLocations();
             updateLocationsTable(locations);
             updateStats(locations);
+            updateMapMarkers();
             
-            if (map) {
-                updateMapMarkers();
+            // اگر صفحه اصلی فعال است، موقعیت فعلی را چک کن
+            if (document.getElementById('home-page').classList.contains('active') && currentLocation) {
+                getLocation();
             }
         }
-        
-        // انیمیشن تکان دادن
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-                20%, 40%, 60%, 80% { transform: translateX(5px); }
-            }
-        `;
-        document.head.appendChild(style);
         
         // بارگذاری اولیه
         window.onload = function() {
@@ -1100,11 +671,16 @@
                 alert('مرورگر شما از GPS پشتیبانی نمی‌کند. لطفا از مرورگر دیگری استفاده کنید.');
             }
             
-            // اتصال فرم لاگین
-            document.getElementById('login-form').addEventListener('submit', login);
+            // بارگذاری موقعیت‌های ذخیره شده
+            refreshLocations();
             
-            // بررسی وضعیت ورود
-            checkLogin();
+            // نمایش پیام خوش‌آمد
+            setTimeout(() => {
+                const locations = loadLocations();
+                if (locations.length > 0) {
+                    console.log(`📊 ${locations.length} موقعیت از قبل ذخیره شده است.`);
+                }
+            }, 1000);
         };
     </script>
 </body>

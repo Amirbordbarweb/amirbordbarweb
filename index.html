@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سایت موقعیت‌یابی - صفحه اصلی</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- نوار ناوبری -->
+    <nav class="navbar">
+        <div class="logo">
+            <span>📍</span>
+            <span>سایت موقعیت‌یابی</span>
+        </div>
+        <div class="nav-links">
+            <button class="nav-btn active" onclick="window.location.href='index.html'">🏠 صفحه اصلی</button>
+            <button class="nav-btn" onclick="window.location.href='admin.html'">👨‍💼 ورود به پنل</button>
+        </div>
+    </nav>
+    
+    <!-- محتوای اصلی -->
+    <div class="container">
+        <div class="hero">
+            <h1>🌍 به سایت ما خوش آمدید</h1>
+            <p>سیستم پیشرفته ردیابی و مدیریت موقعیت جغرافیایی</p>
+            
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">📍</div>
+                    <h3>ردیابی خودکار</h3>
+                    <p>دریافت خودکار موقعیت جغرافیایی</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🗺️</div>
+                    <h3>نقشه تعاملی</h3>
+                    <p>نمایش موقعیت‌ها روی نقشه</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>تحلیل داده</h3>
+                    <p>آمار و گزارش‌های پیشرفته</p>
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <h3>⚠️ نکات مهم</h3>
+                <ul>
+                    <li>برای دسترسی به پنل مدیریت روی دکمه "ورود به پنل" کلیک کنید</li>
+                    <li>سیستم به دسترسی موقعیت مکانی نیاز دارد</li>
+                    <li>اطلاعات موقعیت تنها در پنل مدیریت قابل مشاهده است</li>
+                    <li>از مرورگرهای مدرن استفاده کنید</li>
+                </ul>
+            </div>
+            
+            <div class="cta">
+                <a href="admin.html" class="btn btn-primary">ورود به پنل مدیریت</a>
+                <button class="btn btn-secondary" onclick="showAbout()">درباره سیستم</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+    <script>
+        function showAbout() {
+            alert('این یک سیستم ردیابی موقعیت جغرافیایی است.\n\nویژگی‌ها:\n• دریافت خودکار موقعیت\n• نمایش روی نقشه\n• پنل مدیریت امن\n• گزارش‌های تحلیلی');
+        }
+        
+        // بررسی دسترسی موقعیت
+        if (navigator.geolocation) {
+            console.log('مرورگر از GPS پشتیبانی می‌کند');
+        } else {
+            alert('مرورگر شما از GPS پشتیبانی نمی‌کند. لطفا مرورگر را به‌روز کنید.');
+        }
+    </script>
+</body>
+</html>

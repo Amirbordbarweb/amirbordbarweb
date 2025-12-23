@@ -20,76 +20,204 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            margin-top: 20px;
+            margin: 10px;
         }
         button:hover {
             background-color: #45a049;
         }
         #message {
             margin-top: 20px;
-            color: #555;
-        }
-        .history-count {
+            padding: 15px;
+            border-radius: 8px;
             background-color: #e8f5e9;
-            padding: 10px;
-            border-radius: 5px;
+        }
+        .stats {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
             margin: 20px auto;
-            max-width: 300px;
+            max-width: 400px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
     </style>
 </head>
 <body>
-    <h1>خوش آمدید! 🌍</h1>
-    <p>برای نمایش موقعیت شما، دکمه زیر را کلیک کنید.</p>
+    <h1>🌍 دریافت موقعیت</h1>
     
-    <div class="history-count">
-        <p>📍 تعداد موقعیت‌های ذخیره شده: <span id="historyCount">0</span></p>
+    <div class="stats">
+        <p>تعداد موقعیت‌های ذخیره شده: <span id="totalCount">0</span></p>
+        <p>آخرین موقعیت: <span id="lastLocation">ندارد</span></p>
     </div>
     
-    <button onclick="getLocation()">دریافت موقعیت من</button>
-    <p id="message"></p>
+    <button onclick="getLocation()">📍 دریافت موقعیت من</button>
+    <p id="message">آماده دریافت موقعیت...</p>
+    
+    <p>
+        <a href="show-location.html" style="color: #2196F3; text-decoration: none;">
+            📋 مشاهده تمام موقعیت‌ها →
+        </a>
+    </p>
 
     <script>
-        // نمایش تعداد موقعیت‌های ذخیره شده
-        function updateHistoryCount() {
-            const history = getLocationHistory();
-            document.getElementById("historyCount").textContent = history.length;
+        // تنظیمات دیتابیس
+        const DB_NAME = "LocationsDB";
+        const DB_VERSION = 1;
+        const STORE_NAME = "locations";
+        let db = null;
+        
+        // مقداردهی اولیه دیتابیس
+        function initDatabase() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                
+                request.onerror = (event) => {
+                    console.error("خطا در بازکردن دیتابیس:", event.target.error);
+                    reject(event.target.error);
+                };
+                
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    console.log("✅ دیتابیس با موفقیت باز شد");
+                    updateStats();
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = (event) => {
+                    const database = event.target.result;
+                    
+                    // ایجاد object store اگر وجود نداشته باشد
+                    if (!database.objectStoreNames.contains(STORE_NAME)) {
+                        const store = database.createObjectStore(STORE_NAME, {
+                            keyPath: 'id',
+                            autoIncrement: true
+                        });
+                        
+                        // ایجاد ایندکس‌ها
+                        store.createIndex('timestamp', 'timestamp', { unique: false });
+                        store.createIndex('deviceId', 'deviceId', { unique: false });
+                        
+                        console.log("✅ object store ایجاد شد");
+                    }
+                };
+            });
         }
         
-        // دریافت لیست موقعیت‌های ذخیره شده
-        function getLocationHistory() {
-            const history = localStorage.getItem("locationHistory");
-            return history ? JSON.parse(history) : [];
-        }
-        
-        // ذخیره موقعیت جدید در لیست
-        function saveLocationToHistory(latitude, longitude, accuracy) {
-            const history = getLocationHistory();
-            
-            // ایجاد رکورد جدید
-            const newRecord = {
-                id: Date.now(), // استفاده از timestamp به عنوان ID
-                latitude: latitude,
-                longitude: longitude,
-                accuracy: accuracy,
-                timestamp: new Date().toLocaleString('fa-IR'),
-                date: new Date().toISOString()
-            };
-            
-            // اضافه کردن به ابتدای لیست (جدیدترین اول)
-            history.unshift(newRecord);
-            
-            // محدود کردن تعداد رکوردها (اختیاری، مثلاً آخرین 50 مورد)
-            if (history.length > 50) {
-                history.pop(); // حذف قدیمی‌ترین
+        // تولید شناسه دستگاه
+        function getDeviceId() {
+            let deviceId = localStorage.getItem('deviceId');
+            if (!deviceId) {
+                deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('deviceId', deviceId);
             }
-            
-            // ذخیره در localStorage
-            localStorage.setItem("locationHistory", JSON.stringify(history));
-            
-            return newRecord;
+            return deviceId;
         }
         
+        // ذخیره موقعیت در دیتابیس
+        async function saveLocationToDB(latitude, longitude, accuracy) {
+            if (!db) await initDatabase();
+            
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                
+                const locationData = {
+                    latitude: latitude,
+                    longitude: longitude,
+                    accuracy: accuracy,
+                    deviceId: getDeviceId(),
+                    timestamp: new Date().toISOString(),
+                    timestampPersian: new Date().toLocaleString('fa-IR'),
+                    ip: await getIPAddress()
+                };
+                
+                const request = store.add(locationData);
+                
+                request.onsuccess = () => {
+                    console.log("✅ موقعیت در دیتابیس ذخیره شد");
+                    updateStats();
+                    resolve(request.result);
+                };
+                
+                request.onerror = (event) => {
+                    console.error("خطا در ذخیره موقعیت:", event.target.error);
+                    reject(event.target.error);
+                };
+            });
+        }
+        
+        // دریافت آدرس IP
+        async function getIPAddress() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                return data.ip;
+            } catch (error) {
+                return 'نامشخص';
+            }
+        }
+        
+        // دریافت تعداد کل موقعیت‌ها
+        async function getTotalCount() {
+            if (!db) await initDatabase();
+            
+            return new Promise((resolve) => {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const countRequest = store.count();
+                
+                countRequest.onsuccess = () => {
+                    resolve(countRequest.result);
+                };
+                
+                countRequest.onerror = () => {
+                    resolve(0);
+                };
+            });
+        }
+        
+        // دریافت آخرین موقعیت
+        async function getLastLocation() {
+            if (!db) await initDatabase();
+            
+            return new Promise((resolve) => {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const index = store.index('timestamp');
+                
+                const request = index.openCursor(null, 'prev');
+                let lastLocation = null;
+                
+                request.onsuccess = (event) => {
+                    const cursor = event.target.result;
+                    if (cursor) {
+                        lastLocation = cursor.value;
+                    }
+                    resolve(lastLocation);
+                };
+                
+                request.onerror = () => {
+                    resolve(null);
+                };
+            });
+        }
+        
+        // به‌روزرسانی آمار
+        async function updateStats() {
+            try {
+                const totalCount = await getTotalCount();
+                document.getElementById('totalCount').textContent = totalCount;
+                
+                const lastLocation = await getLastLocation();
+                if (lastLocation) {
+                    document.getElementById('lastLocation').textContent = 
+                        `${lastLocation.latitude.toFixed(4)}, ${lastLocation.longitude.toFixed(4)}`;
+                }
+            } catch (error) {
+                console.error("خطا در به‌روزرسانی آمار:", error);
+            }
+        }
+        
+        // دریافت موقعیت
         async function getLocation() {
             const message = document.getElementById("message");
             
@@ -100,28 +228,38 @@
             
             message.innerHTML = "در حال دریافت موقعیت... لطفاً صبر کنید.";
             
+            // مقداردهی اولیه دیتابیس
+            await initDatabase();
+            
             navigator.geolocation.getCurrentPosition(
-                function(position) {
+                async function(position) {
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
                     const acc = position.coords.accuracy;
                     
-                    // 1. ذخیره موقعیت جاری
+                    // ذخیره در localStorage برای نمایش فوری
                     localStorage.setItem("userLatitude", lat);
                     localStorage.setItem("userLongitude", lng);
                     localStorage.setItem("userAccuracy", acc);
                     
-                    // 2. اضافه کردن به تاریخچه
-                    saveLocationToHistory(lat, lng, acc);
-                    
-                    // 3. به‌روزرسانی شمارنده
-                    updateHistoryCount();
-                    
-                    // 4. انتقال به صفحه نمایش
-                    message.innerHTML = "✅ موقعیت دریافت شد! در حال انتقال...";
-                    setTimeout(() => {
-                        window.location.href = "show-location.html";
-                    }, 1000);
+                    try {
+                        // ذخیره در دیتابیس
+                        await saveLocationToDB(lat, lng, acc);
+                        
+                        message.innerHTML = `
+                            ✅ موقعیت با موفقیت دریافت و ذخیره شد!<br>
+                            📍 مختصات: ${lat.toFixed(6)}, ${lng.toFixed(6)}<br>
+                            🎯 دقت: ${acc.toFixed(2)} متر
+                        `;
+                        
+                        // هدایت به صفحه نمایش پس از 2 ثانیه
+                        setTimeout(() => {
+                            window.location.href = "show-location.html";
+                        }, 2000);
+                        
+                    } catch (error) {
+                        message.innerHTML = "⚠️ موقعیت دریافت شد اما در دیتابیس ذخیره نشد.";
+                    }
                 },
                 function(error) {
                     let errorMessage;
@@ -148,8 +286,14 @@
             );
         }
         
-        // هنگام لود صفحه، شمارنده را به‌روز کن
-        window.onload = updateHistoryCount;
+        // مقداردهی اولیه هنگام لود صفحه
+        window.onload = async function() {
+            try {
+                await initDatabase();
+            } catch (error) {
+                console.error("خطا در مقداردهی اولیه دیتابیس:", error);
+            }
+        };
     </script>
 </body>
 </html>

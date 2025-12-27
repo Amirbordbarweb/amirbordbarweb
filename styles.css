@@ -1,0 +1,802 @@
+/* ===== فونت‌های گوگل ===== */
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
+
+/* ===== متغیرهای CSS (Variables) ===== */
+:root {
+  --header-height: 5rem;
+  --font-semi: 600;
+  --hue-color: 224;
+  --first-color: hsl(var(--hue-color), 89%, 60%);
+  --second-color: hsl(var(--hue-color), 56%, 12%);
+  --body-font: "Vazirmatn", "Poppins", sans-serif;
+  --big-font-size: 2rem;
+  --h2-font-size: 1.25rem;
+  --normal-font-size: .938rem;
+  --smaller-font-size: .75rem;
+  --mb-2: 1rem;
+  --mb-4: 2rem;
+  --mb-5: 2.5rem;
+  --mb-6: 3rem;
+  --z-fixed: 100;
+}
+
+/* ===== تنظیمات ریسپانسیو برای دسکتاپ ===== */
+@media screen and (min-width: 968px) {
+  :root {
+    --big-font-size: 3.5rem;
+    --h2-font-size: 2rem;
+    --normal-font-size: 1rem;
+    --smaller-font-size: .875rem;
+  }
+}
+
+/* ===== استایل‌های پایه (BASE) ===== */
+*, ::before, ::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: var(--header-height) 0 0 0;
+  font-family: var(--body-font);
+  font-size: var(--normal-font-size);
+  color: var(--second-color);
+  font-feature-settings: "ss01";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, p {
+  margin: 0;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ===== چیدمان (LAYOUT) ===== */
+.bd-grid {
+  max-width: 1024px;
+  display: grid;
+  margin-left: var(--mb-2);
+  margin-right: var(--mb-2);
+}
+
+.l-header {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--z-fixed);
+  background-color: #fff;
+  box-shadow: 0 1px 4px rgba(146, 161, 176, 0.15);
+}
+
+/* ===== ناوبری (NAV) ===== */
+.nav {
+  height: var(--header-height);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: var(--font-semi);
+  padding: 0 var(--mb-2);
+}
+
+.nav__menu {
+  display: none;
+}
+
+.nav__toggle {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--second-color);
+}
+
+/* استایل آیتم‌های منو برای موبایل */
+.nav__item {
+  margin-bottom: var(--mb-2);
+}
+
+.nav__link {
+  color: var(--second-color);
+  font-weight: var(--font-semi);
+  padding: 1rem 0;
+  display: block;
+  transition: color 0.3s;
+  font-size: 1.5rem;
+}
+
+.nav__link:hover {
+  color: var(--first-color);
+}
+
+/* فعال‌سازی منو در موبایل */
+.nav__menu.show-menu {
+  display: block;
+  position: absolute;
+  top: var(--header-height);
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  padding: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: var(--z-fixed);
+}
+
+/* استایل لوگو */
+.nav__logo {
+  color: white;
+  font-size: clamp(1.1rem, 3.5vw, 1.8rem);
+  font-weight: 700;
+  padding: 0.6rem 1.5rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, 
+      var(--first-color) 0%,
+      color-mix(in srgb, var(--first-color) 80%, var(--second-color) 20%) 100%
+  );
+  box-shadow: 
+      0 3px 0 color-mix(in srgb, var(--first-color) 80%, #000 20%),
+      0 6px 16px rgba(var(--hue-color), 89%, 60%, 0.2);
+  border: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: visible !important;
+  z-index: 1;
+}
+
+/* نقطه اول: بالا-راست (Top-Right) */
+.nav__logo::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 9px;
+  height: 9px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  z-index: 2;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+/* نقطه دوم: پایین-چپ (Bottom-Left) */
+.nav__logo::after {
+  content: '';
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  width: 9px;
+  height: 9px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  z-index: 2;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+@media screen and (max-width: 480px) {
+  .nav__logo {
+      font-size: 1rem;
+      word-break: break-word;
+      max-width: 150px;
+  }
+}
+
+/* ===== صفحه اصلی (HOME) ===== */
+.home {
+  position: relative;
+  row-gap: 5rem;
+  padding: 5rem 0 5rem;
+  text-align: rtl;
+}
+
+.home__data {
+  align-self: center;
+  padding: 0 var(--mb-2);
+}
+
+.home__title {
+  font-size: var(--big-font-size);
+  margin-bottom: var(--mb-5);
+  line-height: 1.5;
+}
+
+.home__title-color {
+  color: var(--first-color);
+}
+
+/* ===== دکمه‌ها (BUTTONS) ===== */
+.button {
+  display: inline-block;
+  background-color: var(--first-color);
+  color: #fff;
+  padding: 0.75rem 2.5rem;
+  font-weight: var(--font-semi);
+  border-radius: 0.5rem;
+  transition: all 0.3s;
+  margin-top: var(--mb-2);
+}
+
+.button:hover {
+  box-shadow: 0px 10px 36px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+/* ===== پاورقی (FOOTER) ===== */
+.footer {
+  background-color: var(--second-color);
+  color: #fff;
+  text-align: center;
+  font-weight: var(--font-semi);
+  padding: 2rem 0;
+}
+
+.footer__title {
+  font-size: 1.5rem;
+  margin-bottom: var(--mb-4);
+}
+
+.footer__social {
+  margin-bottom: var(--mb-4);
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.footer__icon {
+  font-size: 1.5rem;
+  color: #fff;
+  transition: transform 0.3s;
+}
+
+.footer__icon:hover {
+  transform: translateY(-3px);
+}
+
+.footer__copy {
+  font-size: var(--smaller-font-size);
+  margin-top: var(--mb-2);
+}
+
+/* ===== کوئری‌های رسانه‌ای (MEDIA QUERIES) ===== */
+
+/* برای موبایل - غیرفعال کردن انیمیشن‌های پیچیده */
+@media screen and (max-width: 767px) {
+  .button:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .nav__link:hover {
+    color: var(--second-color);
+  }
+  
+  .footer__icon:hover {
+    transform: none;
+  }
+}
+
+@media screen and (min-width: 576px) {
+  .home {
+    padding: 4rem 0 2rem;
+  }
+  
+  .home__title {
+    font-size: calc(var(--big-font-size) * 1.2);
+  }
+}
+
+/* برای دسکتاپ - فعال کردن منو و انیمیشن‌ها */
+@media screen and (min-width: 768px) {
+  body {
+    margin: 0;
+  }
+  
+  .nav__menu {
+    display: block !important;
+    position: static;
+    background: none;
+    box-shadow: none;
+    padding: 0;
+  }
+  
+  .nav__list {
+    display: flex;
+    gap: 2rem;
+  }
+  
+  .nav__item {
+    margin-bottom: 0;
+  }
+  
+  .nav__toggle {
+    display: none;
+	
+  }
+  
+  .nav__link {
+    position: relative;
+    padding: 0.5rem 0;
+  }
+  
+  /* انیمیشن underline فقط برای دسکتاپ */
+  .nav__link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 50%;
+    width: 0;
+    height: 2px;
+    background-color: var(--first-color);
+    transition: all 0.3s ease;
+    transform: translateX(50%);
+  }
+  
+  .nav__link:hover::after {
+    width: 100%;
+  }
+  
+  .nav__link:hover {
+    color: var(--first-color);
+  }
+  
+  /* فعال کردن هاورها برای دسکتاپ */
+  .button:hover {
+    box-shadow: 0px 10px 36px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+  
+  .footer__icon:hover {
+    transform: translateY(-3px);
+  }
+  
+  .home {
+    text-align: right;
+    padding: 8rem 0 2rem;
+  }
+  
+  .home__data {
+    padding: 0;
+  }
+}
+
+@media screen and (min-width: 992px) {
+  .bd-grid {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .home__title {
+	text-align: right;
+    font-size: var(--big-font-size);
+  }
+}
+
+/* ===== منوی تمام‌صفحه (Fullscreen) ===== */
+
+/* استایل اصلی منو - تمام صفحه */
+.nav__menu {
+    position: fixed;
+    top: -100vh; /* شروع از بالای صفحه */
+    right: 0;
+    width: 100%;
+    height: 100vh; /* ارتفاع کامل صفحه */
+    background: #ffffff; /* سفید خالص */
+    padding: 2rem 1.5rem;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1000;
+    overflow-y: auto; /* امکان اسکرول */
+    will-change: transform;
+    opacity: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* عمودی وسط */
+    align-items: center; /* افقی وسط */
+    border-top: 3px solid var(--first-color);
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.2);
+}
+
+/* حالت باز شدن منو */
+.nav__menu.show-menu {
+    top: 0; /* از بالای صفحه شروع کن */
+    opacity: 1;
+}
+
+/* مخفی کردن overlay چون خود منو تمام صفحه است */
+.nav__overlay {
+    display: none !important;
+}
+
+/* استایل لیست منو */
+.nav__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* فاصله بیشتر بین آیتم‌ها */
+    width: 100%;
+    max-width: 500px; /* حداکثر عرض برای خوانایی */
+    padding: 3.5rem 0;
+}
+
+/* آیتم‌های منو */
+.nav__item {
+    opacity: 0;
+    transform: translateY(30px); /* حرکت از پایین */
+    transition: all 0.5s ease;
+}
+
+.nav__menu.show-menu .nav__item {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* تأخیر انیمیشن پلکانی */
+.nav__menu.show-menu .nav__item:nth-child(1) { transition-delay: 0.1s; }
+.nav__menu.show-menu .nav__item:nth-child(2) { transition-delay: 0.2s; }
+.nav__menu.show-menu .nav__item:nth-child(3) { transition-delay: 0.3s; }
+.nav__menu.show-menu .nav__item:nth-child(4) { transition-delay: 0.4s; }
+.nav__menu.show-menu .nav__item:nth-child(5) { transition-delay: 0.5s; }
+
+/* لینک‌های منو - بزرگ و واضح */
+.nav__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--second-color);
+    border-radius: 18px;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+    border: 2px solid #e9ecef;
+    box-shadow: 
+        0 6px 20px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    text-align: center;
+}
+
+/* افکت هاور */
+.nav__link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        var(--first-color) 0%,
+        transparent 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.nav__link:hover {
+    color: white;
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 
+        0 12px 30px rgba(var(--hue-color), 89%, 60%, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border-color: var(--first-color);
+    background: var(--first-color);
+}
+
+.nav__link:hover::before {
+    opacity: 0.2;
+}
+
+/* آیکون‌ها */
+.nav__link i {
+    font-size: 1.8rem;
+    opacity: 0.9;
+    transition: all 0.3s ease;
+    order: -1;
+    margin-left: 1rem;
+}
+
+.nav__link:hover i {
+    opacity: 1;
+    transform: translateX(-5px) scale(1.1);
+}
+
+/* متن */
+.nav__link span {
+    flex-grow: 1;
+    text-align: right;
+    font-size: 1.4rem;
+    letter-spacing: -0.5px;
+}
+
+/* دکمه بستن منو (اختیاری) */
+.nav__close-btn {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: var(--second-color);
+    transition: all 0.3s ease;
+    z-index: 1001;
+}
+
+.nav__close-btn:hover {
+    background: var(--first-color);
+    color: white;
+    transform: rotate(90deg);
+    border-color: var(--first-color);
+}
+
+/* ===== دکمه همبرگر برای منوی تمام‌صفحه ===== */
+.hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 26px;
+    height: 20px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    will-change: transform;
+    z-index: 1002;
+}
+
+.hamburger span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background-color: var(--second-color);
+    border-radius: 3px;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-origin: center;
+}
+
+/* انیمیشن تبدیل به X */
+.hamburger.active {
+    transform: rotate(180deg);
+}
+
+.hamburger.active span:nth-child(1) {
+    transform: translateY(8.5px) rotate(45deg);
+    background-color: var(--first-color);
+}
+
+.hamburger.active span:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+}
+
+.hamburger.active span:nth-child(3) {
+    transform: translateY(-8.5px) rotate(-45deg);
+    background-color: var(--first-color);
+}
+
+/* ===== ریسپانسیو ===== */
+
+/* موبایل‌های کوچک */
+@media screen and (max-width: 480px) {
+    .nav__menu {
+        padding: 1.5rem 1rem;
+        justify-content: flex-start; /* از بالا شروع کن */
+        padding-top: 6rem; /* فضای بیشتر از بالا */
+    }
+    
+    .nav__list {
+        gap: 1rem;
+        max-width: 100%;
+    }
+    
+    .nav__link {
+        padding: 1.3rem 1.5rem;
+        font-size: 1.2rem;
+    }
+    
+    .nav__link span {
+        font-size: 1.2rem;
+    }
+    
+    .nav__link i {
+        font-size: 1.5rem;
+    }
+}
+
+/* تبلت‌ها */
+@media screen and (min-width: 481px) and (max-width: 768px) {
+    .nav__menu {
+        padding: 3rem 2rem;
+    }
+    
+    .nav__list {
+        max-width: 450px;
+        gap: 1.2rem;
+    }
+    
+    .nav__link {
+        padding: 1.4rem 2rem;
+        font-size: 1.25rem;
+    }
+}
+
+/* دسکتاپ - بازگشت به حالت عادی */
+@media screen and (min-width: 769px) {
+    .nav__menu {
+        position: static;
+        top: auto;
+        height: auto;
+        width: auto;
+        padding: 0;
+        opacity: 1;
+        display: block !important;
+        background: none;
+        box-shadow: none;
+        border-top: none;
+        transition: none;
+        overflow: visible;
+        justify-content: flex-start;
+        align-items: flex-start;
+    }
+    
+    .nav__list {
+        flex-direction: row;
+        gap: 1.5rem;
+        max-width: none;
+        padding: 0;
+    }
+    
+    .nav__item {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+    
+    /* حذف تاخیر انیمیشن */
+    .nav__menu.show-menu .nav__item {
+        transition-delay: 0s !important;
+    }
+    
+    .nav__link {
+        padding: 0.5rem 0;
+        background: none;
+        border: none;
+        box-shadow: none;
+        font-size: 1rem;
+        font-weight: 600;
+        width: auto;
+        color: var(--second-color);
+    }
+    
+    .nav__link::before {
+        display: none;
+    }
+    
+    .nav__link:hover {
+        color: var(--first-color);
+        transform: none;
+        background: none;
+        border: none;
+        box-shadow: none;
+    }
+    
+    .nav__link i {
+        display: none;
+    }
+    
+    .nav__link span {
+        font-size: 1rem;
+        text-align: center;
+    }
+    
+    /* underline animation برای دسکتاپ */
+    .nav__link {
+        position: relative;
+    }
+    
+    .nav__link::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 0;
+        height: 2px;
+        background: var(--first-color);
+        transition: width 0.3s ease;
+    }
+    
+    .nav__link:hover::after {
+        width: 100%;
+    }
+    
+    .hamburger {
+        display: none;
+    }
+    
+    .nav__close-btn {
+        display: none;
+    }
+}
+
+/* بهبود اسکرول در موبایل */
+.nav__menu {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--first-color) #f1f1f1;
+}
+
+.nav__menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.nav__menu::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.nav__menu::-webkit-scrollbar-thumb {
+    background: var(--first-color);
+    border-radius: 10px;
+}
+
+/* بهینه‌سازی عملکرد */
+@media (prefers-reduced-motion: reduce) {
+    .nav__menu,
+    .nav__item,
+    .nav__link,
+    .hamburger span {
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* افکت کلیک روی لینک‌ها */
+.nav__link:active {
+    transform: scale(0.98) !important;
+    transition: transform 0.1s ease !important;
+}
+
+
+/* این 4 خط رو به styles.css اضافه کن */
+.nav__toggle {
+    z-index: 10010;
+    position: relative;
+}
+
+.nav__menu {
+    z-index: 10000;
+}
+
+.nav__menu.show-menu {
+    z-index: 10000;
+}
+
+/* اختیاری: بهبود ظاهر دکمه */
+.nav__toggle {
+    background: white;
+    padding: 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
